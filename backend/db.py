@@ -1,21 +1,60 @@
 import os
-import psycopg2
-from dotenv import load_dotenv
 import json
+import psycopg2
+from psycopg2 import pool
+from dotenv import load_dotenv
+from anonymizer import mask_sensitive_data
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+_connection_pool = None
+
+
+def get_pool():
+    """
+    Initialise ou retourne le pool de connexions thread-safe (1 à 10 connexions réutilisables).
+    Évite d'ouvrir et fermer une connexion TCP+SSL à chaque analyse.
+    """
+    global _connection_pool
+    if _connection_pool is None:
+        if not DATABASE_URL:
+            raise ValueError("DATABASE_URL non configurée dans l'environnement.")
+        _connection_pool = pool.ThreadedConnectionPool(
+            minconn=1,
+            maxconn=10,
+            dsn=DATABASE_URL,
+            connect_timeout=5,
+        )
+    return _connection_pool
+
+
+def close_pool():
+    """
+    Ferme proprement toutes les connexions actives du pool à l'arrêt de l'application.
+    """
+    global _connection_pool
+    if _connection_pool is not None:
+        _connection_pool.closeall()
+        _connection_pool = None
+
 
 def get_connection():
     """
-    Ouvre une nouvelle connexion à la base de données.
-    connect_timeout empêche une connexion de rester bloquée
-    indéfiniment si le réseau a un problème temporaire.
-    L'appelant est responsable de fermer la connexion après usage.
+    Emprunte une connexion déjà ouverte depuis le pool.
+    L'appelant DOIT impérativement la restituer via release_connection(conn).
     """
-    return psycopg2.connect(DATABASE_URL, connect_timeout=5)
+    p = get_pool()
+    return p.getconn()
+
+
+def release_connection(conn):
+    """
+    Restitue la connexion au pool pour réutilisation immédiate.
+    """
+    if _connection_pool is not None and conn is not None:
+        _connection_pool.putconn(conn)
 
 
 def init_db():
@@ -43,17 +82,19 @@ def init_db():
             """)
         conn.commit()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 def save_analysis(content, url, result):
     """
     Enregistre le résultat d'une analyse dans la base de données.
-    N'est jamais appelée par le Core lui-même — uniquement par la
-    couche API, après que analyze_content() a retourné son résultat.
+    Anonymise automatiquement les données personnelles (RGPD) avant stockage.
     """
     conn = get_connection()
     try:
+        # Filtrage RGPD préalable : masquage des téléphones, emails et données bancaires
+        safe_content = mask_sensitive_data(content)
+
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO analyses (
@@ -62,7 +103,7 @@ def save_analysis(content, url, result):
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                content,
+                safe_content,
                 url,
                 json.dumps(result["signals"]),
                 json.dumps(result["relations"]),
@@ -73,9 +114,9 @@ def save_analysis(content, url, result):
             ))
         conn.commit()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 if __name__ == "__main__":
     init_db()
-    print("Table 'analyses' créée (ou déjà existante).")
+    print("Base de données initialisée avec succès avec le pool de connexions.")

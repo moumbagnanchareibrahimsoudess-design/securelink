@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from contextlib import asynccontextmanager
 from analyzer import analyze_content
 from advisor_engine import answer_question
-from db import save_analysis
+from db import save_analysis, init_db, close_pool
 
 load_dotenv()
 
@@ -16,7 +17,18 @@ API_KEY = os.getenv("SECURELINK_API_KEY")
 
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI(title="SecureLink API", version="1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        init_db()
+    except Exception as e:
+        print(f"Avertissement BDD au démarrage : {e}")
+    yield
+    close_pool()
+
+
+app = FastAPI(title="SecureLink API", version="1.0", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
