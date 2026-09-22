@@ -7,6 +7,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from analyzer import analyze_content
+from advisor_engine import answer_question
 from db import save_analysis
 
 load_dotenv()
@@ -32,6 +33,11 @@ class AnalyzeRequest(BaseModel):
     content: str
 
 
+class AskRequest(BaseModel):
+    question: str
+    context: dict = {}
+
+
 def verify_api_key(x_api_key: str = Header(None)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Clé API invalide ou manquante.")
@@ -48,6 +54,13 @@ def analyze(request: Request, body: AnalyzeRequest):
         pass
 
     return result
+
+
+@app.post("/ask", dependencies=[Depends(verify_api_key)])
+@limiter.limit("20/minute")
+def ask(request: Request, body: AskRequest):
+    reply = answer_question(body.question, body.context)
+    return {"reply": reply}
 
 
 @app.get("/")
