@@ -85,7 +85,7 @@ def init_db():
         release_connection(conn)
 
 
-def save_analysis(content, url, result):
+def save_analysis(content, url, result, consent_for_training: bool = False):
     """
     Enregistre le résultat d'une analyse dans la base de données.
     Anonymise automatiquement les données personnelles (RGPD) avant stockage.
@@ -99,9 +99,9 @@ def save_analysis(content, url, result):
             cur.execute("""
                 INSERT INTO analyses (
                     content, url, signals, relations,
-                    risk_score, risk_level, explanation, recommended_action
+                    risk_score, risk_level, explanation, recommended_action, consent_for_training
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 safe_content,
                 url,
@@ -111,6 +111,7 @@ def save_analysis(content, url, result):
                 result["risk"]["level"],
                 json.dumps(result["explanation"]),
                 result["recommended_action"],
+                consent_for_training,
             ))
         conn.commit()
     finally:

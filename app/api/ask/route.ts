@@ -4,8 +4,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    const backendUrl = (process.env.SECURELINK_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
     const backendResponse = await fetch(
-      `${process.env.SECURELINK_API_URL}/ask`,
+      `${backendUrl}/ask`,
       {
         method: "POST",
         headers: {

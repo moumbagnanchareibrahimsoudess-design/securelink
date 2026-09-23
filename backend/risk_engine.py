@@ -7,6 +7,8 @@ signal_weights = {
     "lookalike_domain": 20,
     "external_threat_detection": 30,
     "malware_url_match": 35,
+    "phishing_database_match": 35,
+    "malformed_url": 15,
 }
 
 RELATION_MULTIPLIER = 20

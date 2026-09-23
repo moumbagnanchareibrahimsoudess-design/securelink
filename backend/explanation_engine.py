@@ -26,7 +26,9 @@ signal_explanations = {
     "unusual_port": "le lien utilise un port inhabituel, ce qui merite une verification.",
     "lookalike_domain": "le domain du lien ressemble fortement a celui d'un serveur connu.",
     "external_threat_detection": "l'url a ete signalee comme malveillante ou suspecte par des sources de securite externes.",
-    "malware_url_match": "l'url est connue pour distribuer des logiciels malveillants."
+    "malware_url_match": "l'url est connue pour distribuer des logiciels malveillants.",
+    "phishing_database_match": "l'url est répertoriée dans la base PhishTank comme un site de phishing avéré.",
+    "malformed_url": "l'url fournie présente une syntaxe anormale ou ne contient aucun nom de domaine valide."
 }
 
 

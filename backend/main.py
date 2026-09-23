@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI, Header, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -13,6 +14,12 @@ from db import save_analysis, init_db, close_pool
 
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger("securelink")
+
 API_KEY = os.getenv("SECURELINK_API_KEY")
 
 limiter = Limiter(key_func=get_remote_address)
@@ -22,19 +29,30 @@ limiter = Limiter(key_func=get_remote_address)
 async def lifespan(app: FastAPI):
     try:
         init_db()
+        logger.info("Base de données initialisée avec succès.")
     except Exception as e:
-        print(f"Avertissement BDD au démarrage : {e}")
+        logger.warning("Avertissement BDD au démarrage : %s", e)
     yield
     close_pool()
+    logger.info("Pool de connexions BDD fermé.")
 
 
 app = FastAPI(title="SecureLink API", version="1.0", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+allowed_origins = [
+    origin.strip()
+    for origin in raw_origins.split(",")
+    if origin.strip() and origin.strip() != "*"
+]
+if not allowed_origins:
+    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
@@ -43,6 +61,7 @@ app.add_middleware(
 
 class AnalyzeRequest(BaseModel):
     content: str
+    consent_for_training: bool = False
 
 
 class AskRequest(BaseModel):
@@ -61,9 +80,18 @@ def analyze(request: Request, body: AnalyzeRequest):
     result = analyze_content(body.content)
 
     try:
-        save_analysis(body.content, result["url"], result)
-    except Exception:
-        pass
+        save_analysis(
+            body.content,
+            result.get("url"),
+            result,
+            consent_for_training=body.consent_for_training,
+        )
+    except Exception as e:
+        logger.error(
+            "Échec de l'enregistrement en BDD (%s): %s",
+            type(e).__name__,
+            str(e),
+        )
 
     return result
 

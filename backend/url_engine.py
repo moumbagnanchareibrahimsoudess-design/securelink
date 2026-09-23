@@ -1,36 +1,50 @@
-from ast import And
-import ipaddress   
-from unittest import signals
+import ipaddress
 from urllib.parse import urlparse
 from signal_engine import create_signal
-from technical_knowledge import TECHNICAL_KNOWLEDGE
 from domain_knowledge import domain_knowledge
 
 
-def detect_ip_domain(url):
+def detect_ip_domain(domain):
+    if not domain:
+        return False
     try:
-        ip = ipaddress.ip_address(url)
+        ipaddress.ip_address(domain)
         return True
-    except  ValueError:
-        return False 
+    except (ValueError, TypeError, Exception):
+        return False
+
+
 def detect_unusual_port(url):
-    parsed = urlparse(url)
-    if parsed.port is not None and parsed.port not in [80,443]:
-        return parsed.port
+    try:
+        parsed = urlparse(url)
+        if parsed.port is not None and parsed.port not in [80, 443]:
+            return parsed.port
+    except Exception:
+        return None
     return None
+
+
 def get_known_domain():
-    return domain_knowledge["known_domains"]
+    return domain_knowledge.get("known_domains", [])
+
+
 def similarity_score(domain_a, domain_b):
-    domain_a = domain_a.lower()
-    domain_b = domain_b.lower()
+    if not domain_a or not domain_b:
+        return 0.0
+    domain_a = str(domain_a).lower()
+    domain_b = str(domain_b).lower()
     if domain_a == domain_b:
         return 1.0
     max_length = max(len(domain_a), len(domain_b))
     if max_length == 0:
         return 1.0
-    differences =sum(1 for a, b in zip(domain_a, domain_b) if a != b)
+    differences = sum(1 for a, b in zip(domain_a, domain_b) if a != b)
     return 1 - (differences / max_length)
+
+
 def detect_lookalike_domain(domain):
+    if not domain:
+        return None, 0.0
     known_domains = get_known_domain()
 
     best_domain = None
@@ -40,12 +54,35 @@ def detect_lookalike_domain(domain):
         if score > best_score:
             best_score = score
             best_domain = known_domain
-    
-    return  best_domain, best_score
+
+    return best_domain, best_score
+
 
 def analyze_url(url):
-    parsed = urlparse(url)
-    domain = parsed.hostname
+    if not url:
+        return {
+            "url": "",
+            "scheme": "",
+            "domain": None,
+            "path": "",
+            "query": "",
+            "is_ip_domain": False,
+            "signals": []
+        }
+
+    try:
+        parsed = urlparse(url)
+        domain = parsed.hostname
+        scheme = parsed.scheme or ""
+        path = parsed.path or ""
+        query = parsed.query or ""
+    except Exception:
+        parsed = None
+        domain = None
+        scheme = ""
+        path = ""
+        query = ""
+
     signals = []
 
     unusual_port = detect_unusual_port(url)
@@ -58,6 +95,25 @@ def analyze_url(url):
             confidence=0.8,
             category="technical_anomaly"
         ))
+
+    if not domain:
+        signals.append(create_signal(
+            signal_type="malformed_url",
+            signal_value=url,
+            signal_source="url",
+            evidence="L'URL est malformée ou ne contient aucun nom d'hôte valide.",
+            confidence=0.8,
+            category="technical_anomaly"
+        ))
+        return {
+            "url": url,
+            "scheme": scheme,
+            "domain": None,
+            "path": path,
+            "query": query,
+            "is_ip_domain": False,
+            "signals": signals
+        }
 
     if detect_ip_domain(domain):
         signals.append(create_signal(
@@ -86,22 +142,22 @@ def analyze_url(url):
 
     return {
         "url": url,
-        "scheme": parsed.scheme,
+        "scheme": scheme,
         "domain": domain,
-        "path": parsed.path,
-        "query": parsed.query,
+        "path": path,
+        "query": query,
         "is_ip_domain": detect_ip_domain(domain),
         "signals": signals
     }
-    
+
+
 if __name__ == "__main__":
-    url = input("Entrez une URL à analyser : ")
-    result = analyze_url(url)
-    print(result)
-    print(detect_unusual_port(url))
-    print(get_known_domain())
-    print(similarity_score("google.com", "go0gle.com"))
-    print(detect_lookalike_domain("go0gle.com"))
-    print(similarity_score("faceb00k.com", "facebook.com"))
-    print(detect_lookalike_domain("faceb00k.com"))
-    
+    test_urls = [
+        "https://:8080/path",
+        "https://",
+        "http://",
+        "https://google.com",
+        "https://faceb00k.com",
+    ]
+    for u in test_urls:
+        print(u, "->", analyze_url(u))

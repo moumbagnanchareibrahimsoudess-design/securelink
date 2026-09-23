@@ -10,10 +10,47 @@ from providers.provider_engine import get_external_signals
  
 
 
-def extract_url(content):
-    match = re.search(r"https?://[^\s]+", content)
+def clean_extracted_url(raw_url: str) -> str:
+    """
+    Nettoie l'URL extraite en retirant la ponctuation de fin de phrase
+    (points, virgules, points-virgules, exclamation, guillemets) tout en
+    préservant les query strings, fragments, ports et parenthèses équilibrées.
+    """
+    if not raw_url:
+        return ""
+
+    url = raw_url.strip()
+    trailing_punctuation = ".,;:!?'\"`"
+
+    while url:
+        if url[-1] in trailing_punctuation:
+            url = url[:-1]
+            continue
+
+        if url.endswith(")") and url.count("(") < url.count(")"):
+            url = url[:-1]
+            continue
+
+        if url.endswith("]") and url.count("[") < url.count("]"):
+            url = url[:-1]
+            continue
+
+        if url.endswith("}") and url.count("{") < url.count("}"):
+            url = url[:-1]
+            continue
+
+        break
+
+    return url
+
+
+def extract_url(content: str):
+    if not content:
+        return None
+    match = re.search(r"https?://[^\s<>\"'`]+", content)
     if match:
-        return match.group(0)
+        cleaned = clean_extracted_url(match.group(0))
+        return cleaned if cleaned else None
     return None
 
 def analyze_content(content):

@@ -1,19 +1,26 @@
 import os
-import requests
+import logging
 import base64
+import requests
 from dotenv import load_dotenv
 from signal_engine import create_signal
 
 load_dotenv()
- 
-VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
+
+logger = logging.getLogger("securelink.virustotal")
 
 VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
 VIRUSTOTAL_URL = "https://www.virustotal.com/api/v3/urls"
 
+
 def check_url_virustotal(url):
+    """
+    Vérifie une URL auprès de l'API VirusTotal v3.
+    Retourne un signal normalisé si l'URL est signalée malveillante ou suspecte,
+    ou None si l'URL est saine, inconnue, si la clé est absente, ou en cas d'erreur.
+    """
     if not VIRUSTOTAL_API_KEY:
-        print("DEBUG: clé API absente ou non chargée")
+        logger.debug("VirusTotal: clé API absente ou non configurée, vérification ignorée.")
         return None
 
     try:
@@ -26,18 +33,14 @@ def check_url_virustotal(url):
             timeout=5
         )
 
-        print("DEBUG: status_code =", response.status_code)
-        print("DEBUG: response =", response.text[:500])
-
         if response.status_code != 200:
+            logger.debug("VirusTotal: code réponse HTTP %s pour l'URL demandée", response.status_code)
             return None
 
         data = response.json()
-        stats = data["data"]["attributes"]["last_analysis_stats"]
+        stats = data.get("data", {}).get("attributes", {}).get("last_analysis_stats", {})
         malicious_count = stats.get("malicious", 0)
         suspicious_count = stats.get("suspicious", 0)
-
-        print("DEBUG: malicious =", malicious_count, "suspicious =", suspicious_count)
 
         if malicious_count == 0 and suspicious_count == 0:
             return None
@@ -54,9 +57,11 @@ def check_url_virustotal(url):
         )
 
     except Exception as e:
-        print("DEBUG: exception =", e)
+        logger.warning("VirusTotal: exception lors de l'appel (%s)", type(e).__name__)
         return None
+
+
 if __name__ == "__main__":
-  url = input("Entrez une URL à vérifier sur VirusTotal : ")
-  result = check_url_virustotal(url)
-  print(result)
+    url = input("Entrez une URL à vérifier sur VirusTotal : ")
+    result = check_url_virustotal(url)
+    print(result)

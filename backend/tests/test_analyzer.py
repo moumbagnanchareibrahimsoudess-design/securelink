@@ -78,3 +78,22 @@ def test_provider_indisponible_ne_casse_pas_le_core():
             assert result is not None
         except Exception:
             assert False, "Le Core ne doit jamais planter si un Provider échoue"
+
+
+def test_phishtank_signal_influence_le_score():
+    phishtank_signal = {
+        "type": "phishing_database_match",
+        "value": "known_phishing_url",
+        "source": "phishtank",
+        "evidence": "URL présente et vérifiée dans la base de phishing PhishTank.",
+        "confidence": 0.95,
+        "category": "external_reputation",
+    }
+    with patch("analyzer.get_external_signals", return_value=[phishtank_signal]):
+        result = analyze_content("Consultez ce lien https://verified-phish.com")
+        types = [s["type"] for s in result["signals"]]
+        assert "phishing_database_match" in types
+        assert result["risk"]["score"] >= 33
+        assert result["risk"]["level"] == "Medium"
+        explanation_text = " ".join(result["explanation"])
+        assert "PhishTank" in explanation_text
