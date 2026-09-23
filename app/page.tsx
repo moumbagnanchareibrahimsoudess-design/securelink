@@ -12,16 +12,16 @@ export default function LandingPage() {
       a: "Oui, SecureLink est accessible gratuitement et sans inscription pour vous permettre de vérifier instantanément un message ou un lien suspect en cas de doute.",
     },
     {
-      q: "Que faire si j'ai déjà cliqué sur le lien reçu ?",
-      a: "Dès que vous analysez le message, notre conseiller interactif vous fournit des fiches réflexes d'urgence : déconnexion immédiate, vérification des fichiers téléchargés, et démarches bancaires prioritaires.",
+      q: "Que faire en cas de faux dépôt Mobile Money ou si j'ai donné mon code PIN ?",
+      a: "Notre conseiller interactif vous guide immédiatement : composez le *126# (MTN) ou le *150# (Orange) pour modifier d'urgence votre code secret, contactez le service client au 8787 (MTN) ou 950 (Orange) pour faire suspendre le compte, et ne renvoyez jamais d'argent manuellement.",
     },
     {
-      q: "Mes données personnelles sont-elles protégées ?",
-      a: "Absolument. Conformément au RGPD, notre filtre d'anonymisation automatique masque systématiquement les numéros de téléphone, les adresses email et les coordonnées bancaires avant tout enregistrement en base de données.",
+      q: "Mes données personnelles et mes numéros sont-ils protégés ?",
+      a: "Absolument. Conformément aux exigences de confidentialité et de protection des données, notre filtre d'anonymisation automatique masque systématiquement les numéros camerounais (+237 6...), les adresses email et les informations bancaires avant tout enregistrement.",
     },
     {
-      q: "Quelles sont les bases de sécurité consultées lors d'une analyse ?",
-      a: "SecureLink interroge en temps réel les bases de référence mondiales : VirusTotal, Google Web Risk, URLhaus et PhishTank, en plus de nos moteurs sémantiques propriétaires.",
+      q: "Quelles sont les institutions et bases de sécurité consultées ?",
+      a: "SecureLink interroge en temps réel les bases de référence mondiales (VirusTotal, Google Web Risk, URLhaus, PhishTank) et applique les règles de sécurité recommandées par l'ANTIC (Agence Nationale des TIC du Cameroun).",
     },
   ];
 
@@ -78,12 +78,12 @@ export default function LandingPage() {
                 border: "1px solid #A7F3D0",
               }}
             >
-              Protection Active
+              Cameroun & Afrique
             </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ display: "flex", gap: 20 }} className="desktop-links">
+            <div style={{ display: "flex", gap: 20 }}>
               <a
                 href="#fonctionnement"
                 style={{ textDecoration: "none", color: "#475569", fontSize: 14, fontWeight: 500 }}
@@ -94,13 +94,13 @@ export default function LandingPage() {
                 href="#menaces"
                 style={{ textDecoration: "none", color: "#475569", fontSize: 14, fontWeight: 500 }}
               >
-                Menaces détectées
+                Menaces ciblées
               </a>
               <a
                 href="#securite"
                 style={{ textDecoration: "none", color: "#475569", fontSize: 14, fontWeight: 500 }}
               >
-                Confidentialité & RGPD
+                Confidentialité & ANTIC
               </a>
             </div>
 
@@ -151,7 +151,7 @@ export default function LandingPage() {
             }}
           >
             <span>🛡️</span>
-            <span>Bouclier citoyen contre les arnaques et le phishing</span>
+            <span>Protection contre les fraudes Mobile Money, faux concours et arnaques numériques</span>
           </div>
 
           <h1
@@ -165,7 +165,7 @@ export default function LandingPage() {
             }}
           >
             Ne doutez plus. <br />
-            <span style={{ color: "#0F4C5C" }}>Vérifiez chaque message</span> avant d&apos;agir.
+            <span style={{ color: "#0F4C5C" }}>Vérifiez chaque message suspect</span> avant d&apos;agir.
           </h1>
 
           <p
@@ -173,13 +173,13 @@ export default function LandingPage() {
               fontSize: "clamp(16px, 3.5vw, 19px)",
               color: "#64748B",
               lineHeight: 1.6,
-              maxWidth: 680,
+              maxWidth: 700,
               margin: "0 auto 32px auto",
             }}
           >
-            Faux SMS de livraison, fausses alertes bancaires, liens piégés : analysez n&apos;importe
-            quel message en quelques secondes et dialoguez avec un conseiller d&apos;urgence en cas
-            de doute.
+            Arnaques <strong>Mobile Money (MTN MoMo & Orange Money)</strong>, faux concours de recrutement,
+            fausses bourses d&apos;études et liens piégés : SecureLink analyse vos SMS et messages WhatsApp
+            en quelques secondes et vous guide pas à pas.
           </p>
 
           <div
@@ -256,7 +256,7 @@ export default function LandingPage() {
               }}
             >
               <span style={{ fontSize: 12, fontWeight: 700, color: "#64748B", textTransform: "uppercase" }}>
-                Exemple d&apos;analyse en direct
+                Exemple d&apos;analyse : Arnaque Mobile Money
               </span>
               <span style={{ fontSize: 12, color: "#16803C", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
                 <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#16803C" }} />
@@ -275,22 +275,22 @@ export default function LandingPage() {
                 borderLeft: "4px solid #0F4C5C",
               }}
             >
-              « Chronopost : Votre colis n°FR4920 est bloqué. Réglez 1,99€ de frais avant 18h sur chrono-suivi-douane.com »
+              « Dépôt de 45 000 FCFA reçu de 690123456. Erreur de transfert, veuillez annuler la transaction et renvoyer les fonds sur momo-annuler-transfert.cm »
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <span style={{ fontSize: 22 }}>🔴</span>
-              <span style={{ fontSize: 16, fontWeight: 800, color: "#C62828" }}>RISQUE CRITIQUE (88 / 100)</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#C62828" }}>RISQUE CRITIQUE (90 / 100)</span>
             </div>
 
             <div style={{ height: 6, backgroundColor: "#E2E8F0", borderRadius: 9999, overflow: "hidden", marginBottom: 16 }}>
-              <div style={{ width: "88%", height: "100%", backgroundColor: "#C62828" }} />
+              <div style={{ width: "90%", height: "100%", backgroundColor: "#C62828" }} />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: "#475569" }}>
-              <div>• <strong>Pression temporelle :</strong> sentiment d&apos;urgence artificiel (&quot;avant 18h&quot;).</div>
-              <div>• <strong>Usurpation de domaine :</strong> faux site ne correspondant pas à chronopost.fr.</div>
-              <div>• <strong>Conseil d&apos;urgence :</strong> Ne cliquez pas et ne transmettez aucune coordonnée bancaire.</div>
+              <div>• <strong>Faux Dépôt Mobile Money :</strong> tentative classique d&apos;escroquerie au faux SMS entrant.</div>
+              <div>• <strong>Pression & Lien frauduleux :</strong> faux site ne provenant ni de MTN ni d&apos;Orange.</div>
+              <div>• <strong>Consigne d&apos;urgence :</strong> Ne renvoyez rien ! Vérifiez votre solde réel via *126# ou *150# et contactez le 8787 ou 950.</div>
             </div>
           </div>
         </div>
@@ -351,7 +351,7 @@ export default function LandingPage() {
                 Collez votre message
               </h3>
               <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.6 }}>
-                Copiez le SMS, l&apos;email, le message WhatsApp ou le lien web qui vous semble douteux et déposez-le dans notre zone d&apos;analyse.
+                Copiez le SMS, le message WhatsApp de faux transfert MoMo, ou l&apos;offre de recrutement suspecte et déposez-le dans notre analyseur.
               </p>
             </div>
 
@@ -381,10 +381,10 @@ export default function LandingPage() {
                 2
               </div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "#0F172A" }}>
-                Scan multi-moteurs en direct
+                Scan multi-moteurs contextualisé
               </h3>
               <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.6 }}>
-                Nos moteurs analysent la sémantique, la structure du domaine et interrogent en parallèle les bases mondiales (VirusTotal, Google, URLhaus, PhishTank).
+                Nos algorithmes analysent les demandes de codes PIN, les mentions Mobile Money, les montants en FCFA et croisent les liens avec les bases de menaces mondiales.
               </p>
             </div>
 
@@ -414,10 +414,10 @@ export default function LandingPage() {
                 3
               </div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "#0F172A" }}>
-                Verdict & Conseiller d&apos;urgence
+                Conseils d&apos;urgence adaptés
               </h3>
               <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.6 }}>
-                Vous obtenez un score clair, des recommandations concrètes et pouvez dialoguer avec notre conseiller pour savoir exactement quoi faire.
+                En cas de doute, dialoguez avec le conseiller pour savoir comment changer votre code PIN (*126#, *150#) ou contacter votre opérateur (8787, 950).
               </p>
             </div>
           </div>
@@ -436,10 +436,10 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1080, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 800, color: "#0F172A", marginBottom: 12 }}>
-              Ce que SecureLink neutralise au quotidien
+              Les fraudes neutralisées au Cameroun & en Afrique
             </h2>
             <p style={{ color: "#64748B", fontSize: 16, maxWidth: 560, margin: "0 auto" }}>
-              Les cybercriminels perfectionnent leurs pièges : nous vous aidons à les repérer immédiatement.
+              Des arnaques sophistiquées qui ciblent les portefeuilles mobiles et les chercheurs d&apos;emploi.
             </p>
           </div>
 
@@ -451,41 +451,41 @@ export default function LandingPage() {
             }}
           >
             <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>📦</div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Faux colis & transporteurs</h4>
-              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
-                SMS prétendant un problème d&apos;adresse ou des frais de douane imprévus (Chronopost, Colissimo, Mondial Relay).
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>🏦</div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Alertes bancaires frauduleuses</h4>
-              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
-                Messages alarmistes de « tentative de connexion suspecte » vous incitant à donner vos identifiants ou votre code secret.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>🔐</div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Usurpation de comptes</h4>
-              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
-                Fausses pages de connexion imitant les impôts, l&apos;Assurance Maladie (Ameli), Netflix ou vos réseaux sociaux.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
               <div style={{ fontSize: 28, marginBottom: 12 }}>📱</div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Fausses amendes & urgences</h4>
+              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Arnaques Mobile Money (MoMo & OM)</h4>
               <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
-                Fausses contraventions ANTAI ou arnaques de faux proches en détresse sur WhatsApp réclamant de l&apos;argent.
+                Faux dépôts réclamant un renvoi d&apos;argent, faux messages de compte bloqué et manipulations par codes USSD (*126#, *150#).
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>💼</div>
+              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Faux Concours & Recrutements</h4>
+              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
+                Fausses offres d&apos;emploi pour les Douanes, la Police, l&apos;armée ou des ONG exigeant des « frais de dossier » ou d&apos;examen par Mobile Money.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>✈️</div>
+              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Fausses bourses d&apos;études & Visas</h4>
+              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
+                Promesses de bourses d&apos;études ou de contrats de travail pour le Canada et l&apos;Europe exigeant des transferts préalables en FCFA.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: "#FFFFFF", padding: 24, borderRadius: 12, border: "1px solid #E2E8F0" }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>💬</div>
+              <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Urgences WhatsApp & Tontines en ligne</h4>
+              <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
+                Messages usurpant l&apos;identité d&apos;un proche en détresse médicale ou systèmes pyramidaux promettant de doubler vos dépôts MoMo.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 4 : Confidentialité & RGPD */}
+      {/* Section 4 : Confidentialité & ANTIC */}
       <section
         id="securite"
         style={{
@@ -511,18 +511,18 @@ export default function LandingPage() {
             }}
           >
             <span>🔒</span>
-            <span>Conformité RGPD & Respect de la vie privée</span>
+            <span>Respect strict de la vie privée & Démarches ANTIC</span>
           </div>
 
           <h2 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 800, color: "#0F172A", marginBottom: 16 }}>
-            Vos données personnelles restent strictement confidentielles.
+            Vos données personnelles restent strictement protégées.
           </h2>
 
           <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.6, marginBottom: 32 }}>
-            Nous savons que les messages que vous analysez peuvent contenir des informations sensibles.
-            C&apos;est pourquoi notre moteur applique un <strong>masquage automatique irréversible</strong> :
-            les numéros de téléphone, les adresses email et les coordonnées bancaires sont automatiquement
-            remplacés par des mentions masquées avant tout archivage.
+            Les messages analysés peuvent contenir vos numéros de téléphone ou des informations sensibles.
+            SecureLink applique un <strong>masquage automatique irréversible</strong> :
+            les numéros camerounais (+237 6...), les adresses email et les coordonnées bancaires sont
+            systématiquement remplacés par des mentions masquées avant tout archivage.
           </p>
 
           <div
@@ -538,15 +538,15 @@ export default function LandingPage() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: "#16803C" }}>✓</span>
-              <span>Anonymisation automatique</span>
+              <span>Anonymisation automatique des numéros locaux (+237)</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: "#16803C" }}>✓</span>
-              <span>Zéro revente de données</span>
+              <span>Zéro revente ou partage de données</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: "#16803C" }}>✓</span>
-              <span>Connexions chiffrées de bout en bout</span>
+              <span>Conseils alignés sur les recommandations de l&apos;ANTIC</span>
             </div>
           </div>
         </div>
@@ -566,7 +566,7 @@ export default function LandingPage() {
               Foire Aux Questions
             </h2>
             <p style={{ color: "#64748B", fontSize: 15 }}>
-              Tout ce que vous devez savoir avant d&apos;utiliser SecureLink.
+              Tout ce que vous devez savoir pour sécuriser vos transactions et vos messages.
             </p>
           </div>
 
@@ -632,10 +632,10 @@ export default function LandingPage() {
       >
         <div style={{ maxWidth: 680, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 800, marginBottom: 14, letterSpacing: -0.5 }}>
-            Un doute sur un SMS ou un email reçu ?
+            Un doute sur un SMS ou un message WhatsApp reçu ?
           </h2>
           <p style={{ fontSize: 16, opacity: 0.9, marginBottom: 28, lineHeight: 1.5 }}>
-            Ne prenez aucun risque financier ou personnel. Analysez-le en 5 secondes avec SecureLink.
+            Ne perdez pas vos économies. Analysez le message en 5 secondes avec SecureLink avant d&apos;envoyer le moindre FCFA.
           </p>
           <Link
             href="/analyse"
@@ -674,10 +674,10 @@ export default function LandingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span>🛡️</span>
             <span style={{ fontWeight: 700, color: "#0F4C5C" }}>SecureLink</span>
-            <span>— Plateforme de détection et prévention de cyber-fraude</span>
+            <span>— Plateforme de détection et prévention de cyber-fraude (Cameroun & Afrique)</span>
           </div>
           <div>
-            Conforme RGPD • Données anonymisées • Moteurs certifiés
+            Protection des données • Respect de la vie privée • Conseils ANTIC & Opérateurs
           </div>
         </div>
       </footer>

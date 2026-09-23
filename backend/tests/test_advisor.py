@@ -6,27 +6,26 @@ from advisor_engine import answer_question
 
 
 def test_advisor_clicked():
-    context = {"message": "Colis bloqué", "risk_level": "High", "risk_score": 75}
+    context = {"message": "Faux dépôt MoMo", "risk_level": "High", "risk_score": 75}
     reply = answer_question("J'ai cliqué sur le lien que dois-je faire ?", context)
     assert "Fermez immédiatement la page" in reply
-    assert "antivirus" in reply.lower()
+    assert "code pin" in reply.lower() or "mobile money" in reply.lower()
 
 
-def test_advisor_credentials():
+def test_advisor_credentials_momo():
     context = {"message": "Urgent virement", "risk_level": "Critical", "risk_score": 90}
-    reply = answer_question("J'ai entré mon mot de passe et mon identifiant", context)
-    assert "mot de passe" in reply.lower()
-    assert "2FA" in reply or "authentification" in reply.lower()
+    reply = answer_question("J'ai entré mon code pin MoMo et mon mot de passe", context)
+    assert "code pin" in reply.lower()
+    assert "*126#" in reply or "8787" in reply or "950" in reply
 
 
-def test_advisor_financial():
-    context = {"message": "Payer taxe", "risk_level": "High", "risk_score": 70}
-    reply = answer_question("J'ai donné mes numéros de carte bancaire", context)
-    assert "opposition" in reply.lower()
-    assert "banque" in reply.lower()
+def test_advisor_financial_momo():
+    context = {"message": "Transfert erroné", "risk_level": "High", "risk_score": 70}
+    reply = answer_question("J'ai transféré de l'argent par Orange Money suite au message", context)
+    assert "renvoyez rien" in reply.lower() or "service client" in reply.lower() or "orange" in reply.lower()
 
 
-def test_advisor_report():
-    reply = answer_question("Comment signaler ce numéro et ce message ?", {})
-    assert "33700" in reply
-    assert "PHAROS" in reply or "pharos" in reply.lower()
+def test_advisor_report_cameroon():
+    reply = answer_question("Comment signaler ce numéro à l'antic ou à l'opérateur ?", {})
+    assert "ANTIC" in reply or "antic" in reply.lower()
+    assert "8787" in reply or "950" in reply

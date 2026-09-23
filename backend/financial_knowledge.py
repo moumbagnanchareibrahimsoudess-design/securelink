@@ -18,8 +18,23 @@ financial_knowledge = {
         "gagner",
         "perdre",
         "fcfa",
+        "cfa",
+        "xaf",
         "perte",
-        "financière"
+        "financière",
+        "orange money",
+        "compte om",
+        "momo",
+        "mtn money",
+        "mtn momo",
+        "wave",
+        "dépôt",
+        "retrait",
+        "transfert",
+        "frais de dossier",
+        "frais de déblocage",
+        "frais d'inscription",
+        "solde"
     ],
     "phases": [
         "paiement immédiat",
@@ -33,11 +48,19 @@ financial_knowledge = {
         "revenu insuffisant",
         "vous avez gagne",
         "envoyez l'argent",
-        "vous votre recompense"
+        "vous votre recompense",
+        "transfert erroné",
+        "erreur de transfert",
+        "compte momo bloqué",
+        "compte orange money bloqué",
+        "dépôt effectué",
+        "frais de dossier obligatoires"
     ],
     "variants": [
         "transferz l'argent",
         "faites de paiement",
-        "vous avez remporté"
+        "vous avez remporté",
+        "renvoyez le transfert",
+        "débloquez votre compte momo"
     ]
 }

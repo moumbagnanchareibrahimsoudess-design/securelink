@@ -4,7 +4,14 @@ credential_knowledge = {
         "identifiant",
         "login",
         "connexion",
-        "code otp"
+        "code otp",
+        "code pin",
+        "code secret",
+        "code ussd",
+        "*126#",
+        "*150#",
+        "code de retrait",
+        "pin momo"
     ],
     "phases": [
         "mot de passe oublié",
@@ -14,11 +21,18 @@ credential_knowledge = {
         "compte verrouillé",
         "compte suspendu",
         "code otp",
-        "connexion"
+        "connexion",
+        "composez le code",
+        "entrez votre code secret",
+        "confirmez votre code pin",
+        "validez avec votre code secret",
+        "ne partagez jamais votre code secret"
     ],
     "variants": [
         "réinitialisation du mot de passe",
         "envoyez votre code de vérification",
-        "verifier votre compte"
+        "verifier votre compte",
+        "composez le *126#",
+        "composez le *150#"
     ]
 }

@@ -103,31 +103,31 @@ const EXTERNAL_CATEGORY = "external_reputation";
 
 const SAMPLE_TESTS = [
   {
-    title: "SMS Faux Colis",
-    badge: "Phishing SMS",
-    text: "Chronopost : Votre colis a un retard d'expédition. Veuillez régulariser les frais de douane de 1,99€ sur https://mon-colis-suivi-france.com pour débloquer la livraison.",
-    icon: "📦",
+    title: "SMS Faux Dépôt MoMo",
+    badge: "Arnaque Mobile Money",
+    text: "Dépôt de 45 000 FCFA reçu de 690123456. Erreur de transfert, veuillez annuler la transaction et renvoyer les fonds sur https://momo-annuler-transfert.cm",
+    icon: "📱",
   },
   {
-    title: "Alerte bancaire urgente",
-    badge: "Pression & Identifiants",
-    text: "URGENT : Une tentative de virement inhabituelle a été détectée sur votre compte bancaire. Confirmez votre identité et votre code d'accès immédiatement : https://securite-connexion-espace.com",
-    icon: "🏦",
+    title: "Faux Concours / Emploi",
+    badge: "Faux Recrutement",
+    text: "Félicitations ! Votre dossier a été retenu pour le recrutement spécial à la Douane. Réglez 15 000 FCFA de frais médicaux obligatoires par Orange Money sur https://concours-douane-cm.org",
+    icon: "💼",
   },
   {
     title: "Message de confiance",
     badge: "Légitime",
-    text: "Bonjour, voici le lien de la visioconférence pour notre point d'équipe de ce matin : https://meet.google.com",
+    text: "Bonjour, voici le lien pour notre réunion d'équipe sur Google Meet : https://meet.google.com",
     icon: "🟢",
   },
 ];
 
 const ADVISOR_SUGGESTIONS = [
   { label: "J'ai déjà cliqué sur le lien, que faire ?", icon: "🚨" },
-  { label: "J'ai saisi mon mot de passe ou code", icon: "🔐" },
-  { label: "J'ai donné mes numéros de carte bancaire", icon: "💳" },
-  { label: "Comment signaler et bloquer ce message ?", icon: "🛡️" },
-  { label: "Pourquoi ce lien est-il classé suspect ?", icon: "🔍" },
+  { label: "J'ai donné mon code PIN MoMo / Orange Money", icon: "🔐" },
+  { label: "J'ai transféré de l'argent par Mobile Money", icon: "💸" },
+  { label: "Comment signaler à l'ANTIC ou mon opérateur ?", icon: "🛡️" },
+  { label: "Pourquoi ce message est-il suspect ?", icon: "🔍" },
 ];
 
 function generateUniqueId(): number {

@@ -12,11 +12,11 @@ def test_mask_email():
     assert "[EMAIL MASQUÉ]" in masked
 
 
-def test_mask_phone_french():
-    text = "Rappelez le 06 12 34 56 78 ou le +33612345678 immédiatement."
+def test_mask_phone_cameroon():
+    text = "Rappelez le 690 12 34 56 ou le +237677123456 immédiatement."
     masked = mask_sensitive_data(text)
-    assert "06 12 34 56 78" not in masked
-    assert "+33612345678" not in masked
+    assert "690 12 34 56" not in masked
+    assert "+237677123456" not in masked
     assert "[TÉLÉPHONE MASQUÉ]" in masked
 
 
