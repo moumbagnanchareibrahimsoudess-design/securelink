@@ -1,6 +1,6 @@
 import os
 import logging
-from fastapi import FastAPI, Header, HTTPException, Depends, Request
+from fastapi import FastAPI, Header, HTTPException, Depends, Request, Response, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from analyzer import analyze_content
 from advisor_engine import answer_question
 from db import save_analysis, init_db, close_pool
+from whatsapp_service import verify_whatsapp_webhook, handle_whatsapp_payload
 
 load_dotenv()
 
@@ -106,3 +107,28 @@ def ask(request: Request, body: AskRequest):
 @app.get("/")
 def root():
     return {"status": "ok", "service": "securelink-api"}
+
+
+@app.get("/webhook/whatsapp")
+def whatsapp_verify(request: Request):
+    """Point de contrôle Meta pour la vérification du Webhook WhatsApp."""
+    mode = request.query_params.get("hub.mode")
+    token = request.query_params.get("hub.verify_token")
+    challenge = request.query_params.get("hub.challenge")
+
+    verified_challenge = verify_whatsapp_webhook(mode, token, challenge)
+    if verified_challenge is not None:
+        return Response(content=str(verified_challenge), media_type="text/plain", status_code=200)
+
+    raise HTTPException(status_code=403, detail="Vérification Webhook échouée.")
+
+
+@app.post("/webhook/whatsapp")
+async def whatsapp_incoming(request: Request, background_tasks: BackgroundTasks):
+    """Reçoit les messages WhatsApp en temps réel et traite l'analyse en arrière-plan."""
+    try:
+        payload = await request.json()
+        background_tasks.add_task(handle_whatsapp_payload, payload)
+    except Exception as e:
+        logger.error("Erreur de parsing du payload WhatsApp : %s", e)
+    return {"status": "ok"}
