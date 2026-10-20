@@ -461,13 +461,9 @@ Vérifié avec SecureLink.`;
         .btn-hover:hover {
           filter: brightness(0.95);
         }
-        .responsive-textarea {
-          padding: 12px 115px 12px 12px !important;
-        }
-        @media (min-width: 640px) {
-          .responsive-textarea {
-            padding: 12px 170px 12px 14px !important;
-          }
+        .input-card:focus-within {
+          border-color: #0f4c5c !important;
+          box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.15) !important;
         }
       `}</style>
 
@@ -1284,13 +1280,17 @@ Vérifié avec SecureLink.`;
       >
         <div style={{ maxWidth: 640, margin: "0 auto" }}>
           <div
+            className="input-card"
             style={{
-              position: "relative",
               border: "1px solid #CBD5E1",
-              borderRadius: 12,
+              borderRadius: 16,
               backgroundColor: "#FFFFFF",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-              overflow: "hidden",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+              padding: "12px 14px 10px 14px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              transition: "border-color 0.2s, box-shadow 0.2s",
             }}
           >
             <textarea
@@ -1304,7 +1304,6 @@ Vérifié avec SecureLink.`;
                   : "Collez votre message, SMS, email ou lien suspect ici…"
               }
               rows={1}
-              className="responsive-textarea"
               style={{
                 resize: "none",
                 border: "none",
@@ -1314,102 +1313,120 @@ Vérifié avec SecureLink.`;
                 width: "100%",
                 boxSizing: "border-box",
                 display: "block",
-                lineHeight: 1.4,
+                lineHeight: 1.5,
                 backgroundColor: "transparent",
+                color: "#0F172A",
+                padding: "2px 0",
               }}
             />
 
+            {/* Rangée d'actions en bas de la boîte */}
             <div
               style={{
-                position: "absolute",
-                bottom: 7,
-                right: 8,
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                gap: 5,
+                paddingTop: 4,
               }}
             >
-              {content.trim().length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setContent("")}
-                  style={{
-                    backgroundColor: "transparent",
-                    border: "none",
-                    color: "#94A3B8",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    padding: "4px 6px",
-                  }}
-                  title="Effacer la saisie"
-                >
-                  ✕
-                </button>
-              )}
+              <div>
+                {content.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setContent("")}
+                    className="btn-hover"
+                    style={{
+                      backgroundColor: "#F1F5F9",
+                      border: "none",
+                      color: "#64748B",
+                      cursor: "pointer",
+                      fontSize: 12,
+                      padding: "4px 8px",
+                      borderRadius: 6,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                    title="Effacer la saisie"
+                  >
+                    <span>✕</span>
+                    <span style={{ fontSize: 11 }}>Effacer</span>
+                  </button>
+                )}
+              </div>
 
-              {hasStarted && lastExchange?.result && content.trim().length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {hasStarted && lastExchange?.result && content.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleAskAdvisor(content)}
+                    disabled={isAnyLoading}
+                    className="btn-hover"
+                    style={{
+                      backgroundColor: "#334155",
+                      color: "#FFFFFF",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "7px 11px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: isAnyLoading ? "not-allowed" : "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                    title="Poser cette question au conseiller"
+                  >
+                    <span>💬</span>
+                    <span>Conseil</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
-                  onClick={() => handleAskAdvisor(content)}
-                  disabled={isAnyLoading}
+                  onClick={() => handleAnalyze()}
+                  disabled={isAnyLoading || !content.trim()}
                   className="btn-hover"
                   style={{
-                    backgroundColor: "#334155",
+                    backgroundColor: "#0F4C5C",
                     color: "#FFFFFF",
                     border: "none",
                     borderRadius: 8,
-                    padding: "6px 9px",
-                    fontSize: 12,
+                    padding: "7px 16px",
+                    fontSize: 13,
                     fontWeight: 600,
-                    cursor: isAnyLoading ? "not-allowed" : "pointer",
+                    cursor: isAnyLoading || !content.trim() ? "not-allowed" : "pointer",
+                    opacity: isAnyLoading || !content.trim() ? 0.45 : 1,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 3,
+                    gap: 6,
+                    transition: "all 0.2s",
+                    whiteSpace: "nowrap",
                   }}
-                  title="Poser cette question au conseiller"
                 >
-                  <span>💬</span>
-                  <span className="hidden sm:inline">Conseil</span>
+                  {isAnyLoading && (
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        border: "2px solid #FFFFFF",
+                        borderTopColor: "transparent",
+                        borderRadius: "50%",
+                        animation: "securelink-spin 0.6s linear infinite",
+                        display: "inline-block",
+                      }}
+                    />
+                  )}
+                  <span>Analyser</span>
+                  <span style={{ fontSize: 12 }}>➔</span>
                 </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => handleAnalyze()}
-                disabled={isAnyLoading || !content.trim()}
-                className="btn-hover"
-                style={{
-                  backgroundColor: "#0F4C5C",
-                  color: "#FFFFFF",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "6px 12px",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: isAnyLoading || !content.trim() ? "not-allowed" : "pointer",
-                  opacity: isAnyLoading || !content.trim() ? 0.5 : 1,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  transition: "all 0.2s",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {isAnyLoading && (
-                  <span
-                    style={{
-                      width: 12,
-                      height: 12,
-                      border: "2px solid #FFFFFF",
-                      borderTopColor: "transparent",
-                      borderRadius: "50%",
-                      animation: "securelink-spin 0.6s linear infinite",
-                      display: "inline-block",
-                    }}
-                  />
-                )}
-                <span>Analyser</span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
