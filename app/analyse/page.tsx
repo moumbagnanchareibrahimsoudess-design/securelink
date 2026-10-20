@@ -1329,30 +1329,20 @@ Vérifié avec SecureLink.`;
                 paddingTop: 4,
               }}
             >
-              <div>
-                {content.trim().length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setContent("")}
-                    className="btn-hover"
-                    style={{
-                      backgroundColor: "#F1F5F9",
-                      border: "none",
-                      color: "#64748B",
-                      cursor: "pointer",
-                      fontSize: 12,
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                    title="Effacer la saisie"
-                  >
-                    <span>✕</span>
-                    <span style={{ fontSize: 11 }}>Effacer</span>
-                  </button>
-                )}
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 11,
+                  color: "#94A3B8",
+                  fontWeight: 500,
+                  userSelect: "none",
+                  paddingLeft: 2,
+                }}
+              >
+                <span style={{ fontSize: 10 }}>🛡️</span>
+                <span>SecureLink v1.0</span>
               </div>
 
               <div
