@@ -523,63 +523,6 @@ Vérifié avec SecureLink.`;
               SecureLink
             </span>
           </div>
-
-          <div
-            className="hidden md:inline-flex"
-            style={{
-              alignItems: "center",
-              gap: 6,
-              backgroundColor: "#ECFDF5",
-              color: "#047857",
-              padding: "3px 10px",
-              borderRadius: 9999,
-              fontSize: 12,
-              fontWeight: 600,
-              border: "1px solid #A7F3D0",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                backgroundColor: "#10B981",
-                display: "inline-block",
-                animation: "pulse-dot 2s infinite ease-in-out",
-              }}
-            />
-            Système opérationnel & Conseiller actif
-          </div>
-
-          <div
-            className="inline-flex md:hidden"
-            style={{
-              alignItems: "center",
-              gap: 5,
-              backgroundColor: "#ECFDF5",
-              color: "#047857",
-              padding: "2px 7px",
-              borderRadius: 9999,
-              fontSize: 11,
-              fontWeight: 600,
-              border: "1px solid #A7F3D0",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                backgroundColor: "#10B981",
-                display: "inline-block",
-                animation: "pulse-dot 2s infinite ease-in-out",
-              }}
-            />
-            En ligne
-          </div>
         </div>
 
         {hasStarted && (
@@ -1468,26 +1411,6 @@ Vérifié avec SecureLink.`;
                 <span>Analyser</span>
               </button>
             </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 6,
-              padding: "0 4px",
-              fontSize: 11,
-              color: "#94A3B8",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <span>
-              {hasStarted
-                ? "Entrée pour envoyer votre question ou lancer une analyse"
-                : "Appuyez sur Entrée pour envoyer"}
-            </span>
-            <span className="hidden sm:inline">Conseiller & protection active</span>
           </div>
         </div>
       </div>
