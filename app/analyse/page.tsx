@@ -229,6 +229,7 @@ export default function AnalysePage() {
   const [content, setContent] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [showSamplesMenu, setShowSamplesMenu] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -240,7 +241,7 @@ export default function AnalysePage() {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      const nextHeight = Math.min(Math.max(textareaRef.current.scrollHeight, 44), 160);
+      const nextHeight = Math.min(Math.max(textareaRef.current.scrollHeight, 24), 120);
       textareaRef.current.style.height = `${nextHeight}px`;
     }
   }, [content]);
@@ -812,9 +813,9 @@ Vérifié avec SecureLink.`;
                       <span
                         style={{
                           color: riskColor,
-                          fontWeight: 800,
-                          fontSize: 16,
-                          letterSpacing: 0.5,
+                          fontWeight: 700,
+                          fontSize: 15,
+                          letterSpacing: "-0.01em",
                         }}
                       >
                         {riskLabel}
@@ -828,24 +829,24 @@ Vérifié avec SecureLink.`;
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        gap: 6,
+                        gap: 5,
                         backgroundColor: copiedId === exchange.id ? "#ECFDF5" : "#F8FAFC",
                         color: copiedId === exchange.id ? "#047857" : "#475569",
                         border: `1px solid ${
-                          copiedId === exchange.id ? "#A7F3D0" : "#CBD5E1"
+                          copiedId === exchange.id ? "#A7F3D0" : "#E2E8F0"
                         }`,
-                        borderRadius: 6,
-                        padding: "5px 10px",
+                        borderRadius: 20,
+                        padding: "4px 10px",
                         fontSize: 12,
-                        fontWeight: 600,
+                        fontWeight: 500,
                         cursor: "pointer",
-                        transition: "all 0.2s",
+                        transition: "all 0.15s ease",
                       }}
                       title="Copier un résumé propre pour messagerie ou collègues"
                     >
-                      <span>{copiedId === exchange.id ? "✅" : "📋"}</span>
+                      <span style={{ fontSize: 13 }}>{copiedId === exchange.id ? "✓" : "📋"}</span>
                       <span>
-                        {copiedId === exchange.id ? "Copié !" : "Copier le diagnostic"}
+                        {copiedId === exchange.id ? "Copié !" : "Copier"}
                       </span>
                     </button>
                   </div>
@@ -1269,30 +1270,155 @@ Vérifié avec SecureLink.`;
         <div ref={bottomRef} />
       </main>
 
-      {/* Zone de saisie */}
+      {/* Zone de saisie flottante style ChatGPT */}
       <div
         style={{
-          borderTop: "1px solid #E2E8F0",
-          backgroundColor: "#FFFFFF",
-          padding: "clamp(10px, 2.5vw, 16px)",
-          boxShadow: "0 -2px 10px rgba(0,0,0,0.02)",
+          position: "sticky",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: "rgba(255, 255, 255, 0.94)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderTop: "1px solid rgba(226, 232, 240, 0.8)",
+          padding: "10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px",
+          zIndex: 30,
         }}
       >
-        <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", position: "relative" }}>
+          {/* Popover rapide des exemples (+ button) */}
+          {showSamplesMenu && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 10px)",
+                left: 0,
+                right: 0,
+                backgroundColor: "#FFFFFF",
+                borderRadius: 16,
+                border: "1px solid #E2E8F0",
+                boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05)",
+                padding: 12,
+                zIndex: 40,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingBottom: 6,
+                  borderBottom: "1px solid #F1F5F9",
+                }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#475569" }}>
+                  Exemples de tests rapides
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowSamplesMenu(false)}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: "#94A3B8",
+                    fontSize: 16,
+                    cursor: "pointer",
+                    padding: "0 4px",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {SAMPLE_TESTS.map((sample, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setContent(sample.text);
+                      setShowSamplesMenu(false);
+                      if (textareaRef.current) {
+                        textareaRef.current.focus();
+                      }
+                    }}
+                    className="btn-hover"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      borderRadius: 10,
+                      backgroundColor: "#F8FAFC",
+                      border: "1px solid #F1F5F9",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span style={{ fontSize: 18 }}>{sample.icon}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#0F172A" }}>
+                        {sample.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "#64748B",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {sample.text}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Barre Capsule ChatGPT */}
           <div
-            className="input-card"
             style={{
-              border: "1px solid #CBD5E1",
-              borderRadius: 16,
-              backgroundColor: "#FFFFFF",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-              padding: "12px 14px 10px 14px",
               display: "flex",
-              flexDirection: "column",
+              alignItems: "center",
               gap: 8,
+              backgroundColor: "#F8FAFC",
+              border: "1px solid #E2E8F0",
+              borderRadius: 28,
+              padding: "5px 6px 5px 12px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
               transition: "border-color 0.2s, box-shadow 0.2s",
             }}
           >
+            {/* Bouton + (Exemples / Options) */}
+            <button
+              type="button"
+              onClick={() => setShowSamplesMenu(!showSamplesMenu)}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                backgroundColor: showSamplesMenu ? "#E2E8F0" : "#FFFFFF",
+                border: "1px solid #E2E8F0",
+                color: "#475569",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 18,
+                cursor: "pointer",
+                flexShrink: 0,
+                transition: "all 0.15s ease",
+              }}
+              title="Afficher les exemples d'arnaques fréquentes"
+            >
+              {showSamplesMenu ? "✕" : "+"}
+            </button>
+
+            {/* Textarea auto-extensible 1 ligne */}
             <textarea
               ref={textareaRef}
               value={content}
@@ -1300,124 +1426,119 @@ Vérifié avec SecureLink.`;
               onKeyDown={handleKeyDown}
               placeholder={
                 hasStarted
-                  ? "Posez une question au conseiller ou collez un nouveau contenu…"
-                  : "Collez votre message, SMS, email ou lien suspect ici…"
+                  ? "Poser une question ou coller un message..."
+                  : "Coller un SMS, message ou lien suspect..."
               }
               rows={1}
               style={{
+                flex: 1,
                 resize: "none",
                 border: "none",
-                fontSize: 15,
-                fontFamily: "inherit",
                 outline: "none",
-                width: "100%",
+                backgroundColor: "transparent",
+                fontSize: 15,
+                lineHeight: 1.45,
+                color: "#0F172A",
+                padding: "5px 0",
+                maxHeight: 120,
                 boxSizing: "border-box",
                 display: "block",
-                lineHeight: 1.5,
-                backgroundColor: "transparent",
-                color: "#0F172A",
-                padding: "2px 0",
+                fontFamily: "inherit",
               }}
             />
 
-            {/* Rangée d'actions en bas de la boîte */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingTop: 4,
-              }}
-            >
-              <div
+            {/* Action Conseiller si échange actif */}
+            {hasStarted && lastExchange?.result && content.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={() => handleAskAdvisor(content)}
+                disabled={isAnyLoading}
+                className="btn-hover"
                 style={{
+                  backgroundColor: "#334155",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: 20,
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: isAnyLoading ? "not-allowed" : "pointer",
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
-                  color: "#94A3B8",
-                  fontWeight: 500,
-                  userSelect: "none",
-                  paddingLeft: 2,
+                  gap: 4,
+                  flexShrink: 0,
                 }}
+                title="Poser cette question au conseiller IA"
               >
-                <span style={{ fontSize: 10 }}>🛡️</span>
-                <span>SecureLink v1.0</span>
-              </div>
+                <span>💬</span>
+                <span>Conseil</span>
+              </button>
+            )}
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                {hasStarted && lastExchange?.result && content.trim().length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => handleAskAdvisor(content)}
-                    disabled={isAnyLoading}
-                    className="btn-hover"
-                    style={{
-                      backgroundColor: "#334155",
-                      color: "#FFFFFF",
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "7px 11px",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: isAnyLoading ? "not-allowed" : "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                    title="Poser cette question au conseiller"
-                  >
-                    <span>💬</span>
-                    <span>Conseil</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => handleAnalyze()}
-                  disabled={isAnyLoading || !content.trim()}
-                  className="btn-hover"
+            {/* Bouton d'envoi circulaire style ChatGPT */}
+            <button
+              type="button"
+              onClick={() => handleAnalyze()}
+              disabled={isAnyLoading || !content.trim()}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                backgroundColor: content.trim() ? "#0F4C5C" : "#E2E8F0",
+                color: content.trim() ? "#FFFFFF" : "#94A3B8",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: content.trim() && !isAnyLoading ? "pointer" : "default",
+                transition: "all 0.15s ease",
+                flexShrink: 0,
+              }}
+              title="Analyser ce contenu"
+            >
+              {isAnyLoading ? (
+                <span
                   style={{
-                    backgroundColor: "#0F4C5C",
-                    color: "#FFFFFF",
-                    border: "none",
-                    borderRadius: 8,
-                    padding: "7px 16px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: isAnyLoading || !content.trim() ? "not-allowed" : "pointer",
-                    opacity: isAnyLoading || !content.trim() ? 0.45 : 1,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    transition: "all 0.2s",
-                    whiteSpace: "nowrap",
+                    width: 14,
+                    height: 14,
+                    border: "2px solid #FFFFFF",
+                    borderTopColor: "transparent",
+                    borderRadius: "50%",
+                    animation: "securelink-spin 0.6s linear infinite",
+                    display: "inline-block",
                   }}
+                />
+              ) : (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {isAnyLoading && (
-                    <span
-                      style={{
-                        width: 12,
-                        height: 12,
-                        border: "2px solid #FFFFFF",
-                        borderTopColor: "transparent",
-                        borderRadius: "50%",
-                        animation: "securelink-spin 0.6s linear infinite",
-                        display: "inline-block",
-                      }}
-                    />
-                  )}
-                  <span>Analyser</span>
-                  <span style={{ fontSize: 12 }}>➔</span>
-                </button>
-              </div>
-            </div>
+                  <line x1="12" y1="19" x2="12" y2="5" />
+                  <polyline points="5 12 12 5 19 12" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Discret copyright et version */}
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 6,
+              fontSize: 11,
+              color: "#94A3B8",
+              letterSpacing: 0.2,
+              fontWeight: 400,
+              userSelect: "none",
+            }}
+          >
+            <span>🛡️ SecureLink v1.0 • Scanner Anti-Cyberfraude</span>
           </div>
         </div>
       </div>

@@ -38,8 +38,8 @@ def similarity_score(domain_a, domain_b):
     max_length = max(len(domain_a), len(domain_b))
     if max_length == 0:
         return 1.0
-    differences = sum(1 for a, b in zip(domain_a, domain_b) if a != b)
-    return 1 - (differences / max_length)
+    differences = sum(1 for a, b in zip(domain_a, domain_b) if a != b) + abs(len(domain_a) - len(domain_b))
+    return max(0.0, 1 - (differences / max_length))
 
 
 def detect_lookalike_domain(domain):
@@ -139,6 +139,25 @@ def analyze_url(url):
             confidence=similarity,
             category="technical_anomaly"
         ))
+    else:
+        brand_patterns = domain_knowledge.get("brand_patterns", {})
+        lower_domain = domain.lower()
+        for brand, official_domains in brand_patterns.items():
+            if brand in lower_domain:
+                is_official = any(
+                    lower_domain == od or lower_domain.endswith("." + od)
+                    for od in official_domains
+                )
+                if not is_official:
+                    signals.append(create_signal(
+                        signal_type="lookalike_domain",
+                        signal_value=f"impersonation_{brand}",
+                        signal_source="url",
+                        evidence=f"L'URL utilise la marque ou le service '{brand.upper()}' sur un domaine non officiel ({domain}).",
+                        confidence=0.95,
+                        category="technical_anomaly"
+                    ))
+                    break
 
     return {
         "url": url,

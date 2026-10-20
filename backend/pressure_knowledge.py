@@ -13,6 +13,19 @@ pressure_knowledge = {
          "poursuivie",
          "poursuivies",
          "votre compte sera bloque",
+         "votre compte sera bloqué",
+         "erreur de transfert",
+         "erreur de depot",
+         "erreur de dépôt",
+         "veuillez annuler",
+         "annuler la transaction",
+         "annuler le transfert",
+         "renvoyer les fonds",
+         "renvoyez l'argent",
+         "veuillez renvoyer",
+         "frais medicaux obligatoires",
+         "frais médicaux obligatoires",
+         "frais de dossier obligatoires",
          "faites-le maintenant",
          "derniere chance"
      ],
@@ -23,6 +36,8 @@ pressure_knowledge = {
                 "faites-le sans tarder",
                 "agissez vite",
                 "repondez rapidement",
-                "delai limite"
+                "delai limite",
+                "debloquez votre compte",
+                "débloquez votre compte"
      ]
 }
