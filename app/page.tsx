@@ -32,6 +32,9 @@ export default function LandingPage() {
         backgroundColor: "#FFFFFF",
         color: "#0F172A",
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        overflowX: "hidden",
+        width: "100%",
+        maxWidth: "100vw",
       }}
     >
       {/* Barre de navigation */}
@@ -43,23 +46,25 @@ export default function LandingPage() {
           top: 0,
           zIndex: 50,
           backdropFilter: "blur(8px)",
+          width: "100%",
         }}
       >
         <div
           style={{
             maxWidth: 1120,
             margin: "0 auto",
-            padding: "14px 24px",
+            padding: "12px 16px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🛡️</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <span style={{ fontSize: 22 }}>🛡️</span>
             <span
               style={{
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: 800,
                 color: "#0F4C5C",
                 letterSpacing: -0.5,
@@ -68,6 +73,7 @@ export default function LandingPage() {
               SecureLink
             </span>
             <span
+              className="hidden sm:inline-flex"
               style={{
                 fontSize: 11,
                 fontWeight: 700,
@@ -76,14 +82,15 @@ export default function LandingPage() {
                 padding: "2px 8px",
                 borderRadius: 9999,
                 border: "1px solid #A7F3D0",
+                whiteSpace: "nowrap",
               }}
             >
               Cameroun & Afrique
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ display: "flex", gap: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div className="hidden md:flex" style={{ gap: 20 }}>
               <a
                 href="#fonctionnement"
                 style={{ textDecoration: "none", color: "#475569", fontSize: 14, fontWeight: 500 }}
@@ -110,13 +117,14 @@ export default function LandingPage() {
                 textDecoration: "none",
                 backgroundColor: "#0F4C5C",
                 color: "#FFFFFF",
-                padding: "9px 18px",
+                padding: "8px 14px",
                 borderRadius: 8,
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: 600,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
+                whiteSpace: "nowrap",
                 boxShadow: "0 2px 4px rgba(15,76,92,0.2)",
               }}
             >
@@ -144,13 +152,17 @@ export default function LandingPage() {
               backgroundColor: "#E0F2FE",
               color: "#0F4C5C",
               padding: "6px 14px",
-              borderRadius: 9999,
-              fontSize: 13,
+              borderRadius: 20,
+              fontSize: "clamp(12px, 3.2vw, 13px)",
               fontWeight: 600,
               marginBottom: 20,
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              lineHeight: 1.4,
+              textAlign: "left",
             }}
           >
-            <span>🛡️</span>
+            <span style={{ flexShrink: 0 }}>🛡️</span>
             <span>Protection contre les fraudes Mobile Money, faux concours et arnaques numériques</span>
           </div>
 
@@ -273,6 +285,7 @@ export default function LandingPage() {
                 color: "#1E293B",
                 marginBottom: 16,
                 borderLeft: "4px solid #0F4C5C",
+                wordBreak: "break-word",
               }}
             >
               « Dépôt de 45 000 FCFA reçu de 690123456. Erreur de transfert, veuillez annuler la transaction et renvoyer les fonds sur momo-annuler-transfert.cm »

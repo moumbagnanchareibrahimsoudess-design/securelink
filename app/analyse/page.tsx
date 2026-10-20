@@ -418,6 +418,8 @@ Vérifié avec SecureLink.`;
     <div
       style={{
         height: "100dvh",
+        width: "100%",
+        maxWidth: "100vw",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#F8FAFC",
@@ -459,50 +461,62 @@ Vérifié avec SecureLink.`;
         .btn-hover:hover {
           filter: brightness(0.95);
         }
+        .responsive-textarea {
+          padding: 12px 115px 12px 12px !important;
+        }
+        @media (min-width: 640px) {
+          .responsive-textarea {
+            padding: 12px 170px 12px 14px !important;
+          }
+        }
       `}</style>
 
       {/* En-tête */}
       <header
         style={{
-          padding: "clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px)",
+          padding: "clamp(10px, 2.5vw, 14px) clamp(12px, 3.5vw, 20px)",
           borderBottom: "1px solid #E2E8F0",
           backgroundColor: "#FFFFFF",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+          width: "100%",
+          boxSizing: "border-box",
+          gap: 8,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "nowrap" }}>
           <Link
             href="/"
             style={{
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
-              gap: 6,
+              gap: 4,
               color: "#475569",
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 600,
-              padding: "5px 10px",
+              padding: "5px 8px",
               borderRadius: 8,
               backgroundColor: "#F1F5F9",
               border: "1px solid #E2E8F0",
               transition: "all 0.15s ease",
+              flexShrink: 0,
             }}
             title="Revenir à la page d'accueil"
           >
             <span>←</span>
-            <span>Accueil</span>
+            <span className="hidden sm:inline">Accueil</span>
           </Link>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 22 }}>🛡️</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <span style={{ fontSize: 20 }}>🛡️</span>
             <span
               style={{
                 fontWeight: 700,
                 color: "#0F4C5C",
-                fontSize: "clamp(16px, 4vw, 18px)",
+                fontSize: 16,
                 letterSpacing: -0.3,
               }}
             >
@@ -511,8 +525,8 @@ Vérifié avec SecureLink.`;
           </div>
 
           <div
+            className="hidden md:inline-flex"
             style={{
-              display: "inline-flex",
               alignItems: "center",
               gap: 6,
               backgroundColor: "#ECFDF5",
@@ -522,6 +536,7 @@ Vérifié avec SecureLink.`;
               fontSize: 12,
               fontWeight: 600,
               border: "1px solid #A7F3D0",
+              whiteSpace: "nowrap",
             }}
           >
             <span
@@ -536,6 +551,35 @@ Vérifié avec SecureLink.`;
             />
             Système opérationnel & Conseiller actif
           </div>
+
+          <div
+            className="inline-flex md:hidden"
+            style={{
+              alignItems: "center",
+              gap: 5,
+              backgroundColor: "#ECFDF5",
+              color: "#047857",
+              padding: "2px 7px",
+              borderRadius: 9999,
+              fontSize: 11,
+              fontWeight: 600,
+              border: "1px solid #A7F3D0",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                backgroundColor: "#10B981",
+                display: "inline-block",
+                animation: "pulse-dot 2s infinite ease-in-out",
+              }}
+            />
+            En ligne
+          </div>
         </div>
 
         {hasStarted && (
@@ -545,20 +589,22 @@ Vérifié avec SecureLink.`;
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 6,
+              gap: 4,
               backgroundColor: "#F1F5F9",
               color: "#334155",
               border: "1px solid #CBD5E1",
               borderRadius: 8,
-              padding: "6px 12px",
-              fontSize: 13,
+              padding: "5px 10px",
+              fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.2s",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
             <span>↺</span>
-            <span>Nouvelle analyse</span>
+            <span className="hidden sm:inline">Nouvelle analyse</span>
           </button>
         )}
       </header>
@@ -965,7 +1011,7 @@ Vérifié avec SecureLink.`;
                                 <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172A" }}>
                                   {SIGNAL_LABELS[s.type] ?? s.type}
                                 </div>
-                                <div style={{ fontSize: 13, color: "#64748B" }}>
+                                <div style={{ fontSize: 13, color: "#64748B", wordBreak: "break-all", overflowWrap: "anywhere" }}>
                                   « {s.value} »
                                 </div>
                               </div>
@@ -1186,6 +1232,7 @@ Vérifié avec SecureLink.`;
                         fontSize: 13,
                         maxWidth: "80%",
                         whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
                       }}
                     >
                       💬 {fu.question}
@@ -1314,10 +1361,10 @@ Vérifié avec SecureLink.`;
                   : "Collez votre message, SMS, email ou lien suspect ici…"
               }
               rows={1}
+              className="responsive-textarea"
               style={{
                 resize: "none",
                 border: "none",
-                padding: "12px 170px 12px 14px",
                 fontSize: 15,
                 fontFamily: "inherit",
                 outline: "none",
@@ -1336,7 +1383,7 @@ Vérifié avec SecureLink.`;
                 right: 8,
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 5,
               }}
             >
               {content.trim().length > 0 && (
@@ -1349,7 +1396,7 @@ Vérifié avec SecureLink.`;
                     color: "#94A3B8",
                     cursor: "pointer",
                     fontSize: 13,
-                    padding: "4px 8px",
+                    padding: "4px 6px",
                   }}
                   title="Effacer la saisie"
                 >
@@ -1368,18 +1415,18 @@ Vérifié avec SecureLink.`;
                     color: "#FFFFFF",
                     border: "none",
                     borderRadius: 8,
-                    padding: "7px 11px",
+                    padding: "6px 9px",
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: isAnyLoading ? "not-allowed" : "pointer",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 4,
+                    gap: 3,
                   }}
                   title="Poser cette question au conseiller"
                 >
                   <span>💬</span>
-                  <span>Conseil</span>
+                  <span className="hidden sm:inline">Conseil</span>
                 </button>
               )}
 
@@ -1393,15 +1440,16 @@ Vérifié avec SecureLink.`;
                   color: "#FFFFFF",
                   border: "none",
                   borderRadius: 8,
-                  padding: "7px 14px",
-                  fontSize: 13,
+                  padding: "6px 12px",
+                  fontSize: 12,
                   fontWeight: 600,
                   cursor: isAnyLoading || !content.trim() ? "not-allowed" : "pointer",
                   opacity: isAnyLoading || !content.trim() ? 0.5 : 1,
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 6,
+                  gap: 5,
                   transition: "all 0.2s",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {isAnyLoading && (
@@ -1430,14 +1478,16 @@ Vérifié avec SecureLink.`;
               padding: "0 4px",
               fontSize: 11,
               color: "#94A3B8",
+              gap: 8,
+              flexWrap: "wrap",
             }}
           >
             <span>
               {hasStarted
                 ? "Entrée pour envoyer votre question ou lancer une analyse"
-                : "Appuyez sur Entrée pour envoyer, Maj+Entrée pour un saut de ligne"}
+                : "Appuyez sur Entrée pour envoyer"}
             </span>
-            <span>Conseiller & protection active</span>
+            <span className="hidden sm:inline">Conseiller & protection active</span>
           </div>
         </div>
       </div>
