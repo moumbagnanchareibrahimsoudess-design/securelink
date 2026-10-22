@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 const WHATSAPP_VERIFY_TOKEN =
   process.env.WHATSAPP_VERIFY_TOKEN || "securelink_verify_token_2026";
 
+const WHATSAPP_TOKEN =
+  process.env.WHATSAPP_TOKEN ||
+  "EAAUXAdDM37oBSzlTVC16oyFvYfyG5ZCyMtG1G7fgFi1bocgAt8BXRTYZAOZAwQ8xIEFY58lgOFUYekUyV535U7wnX2aeYgpwLjZBMBh6KZCpoNR9v1TVCaBh9kwZBaAA5GogTTlbzgWkX4ZCP4ZAmEivWkjVyr3BZASKN6R94dj4aBvbTWRiTItOpCpXuuEzQb8G9qRjtCgriWKerK0Dywo4kCG5PUwS9HeHL3NhrbwTTyWaBvmRaAGgAiacMh8h2IHyzCJUDoNLmQ9xT9QDObkKmQLHhp7kZD";
+
+const WHATSAPP_PHONE_NUMBER_ID =
+  process.env.WHATSAPP_PHONE_NUMBER_ID || "1483345801519471";
+
+const SECURELINK_DEFAULT_KEY =
+  process.env.SECURELINK_API_KEY || "00e86441555c7d489f8c3c0e6cf66e6d95e3f003741bceb08c8835d7f84971c6";
+
 const GREETINGS = new Set([
   "bonjour",
   "salut",
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.SECURELINK_API_KEY as string,
+          "x-api-key": SECURELINK_DEFAULT_KEY,
         },
         body: JSON.stringify({ content: textBody }),
       });
@@ -180,8 +190,8 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendWhatsApp(to: string, messageText: string) {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const token = WHATSAPP_TOKEN;
+  const phoneNumberId = WHATSAPP_PHONE_NUMBER_ID;
 
   if (!token || !phoneNumberId) {
     console.warn("WHATSAPP_TOKEN ou WHATSAPP_PHONE_NUMBER_ID manquant.");
