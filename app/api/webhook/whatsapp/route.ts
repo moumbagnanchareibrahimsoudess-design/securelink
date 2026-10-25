@@ -43,8 +43,20 @@ const RISK_LABELS_FR: Record<string, string> = {
   Low: "RISQUE FAIBLE",
 };
 
+const debugLogs: any[] = [];
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
+
+  if (searchParams.get("debug") === "logs") {
+    return NextResponse.json({
+      status: "running",
+      token_configured: WHATSAPP_TOKEN.substring(0, 15) + "..." + WHATSAPP_TOKEN.substring(WHATSAPP_TOKEN.length - 10),
+      phone_id: WHATSAPP_PHONE_NUMBER_ID,
+      logs: debugLogs.slice(-20),
+    });
+  }
+
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
@@ -62,6 +74,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
+    debugLogs.push({ time: new Date().toISOString(), type: "POST_RECEIVED", payload });
 
     // Traitement asynchrone pour répondre à Meta sous 3 secondes
     const entry = payload.entry?.[0];
@@ -215,11 +228,15 @@ async function sendWhatsApp(to: string, messageText: string) {
 
     if (!res.ok) {
       const errText = await res.text();
+      debugLogs.push({ time: new Date().toISOString(), type: "SEND_ERROR", status: res.status, errText, to });
       console.error("Erreur envoi message Meta WhatsApp:", res.status, errText);
       return false;
     }
+    const successData = await res.json();
+    debugLogs.push({ time: new Date().toISOString(), type: "SEND_SUCCESS", to, successData });
     return true;
-  } catch (err) {
+  } catch (err: any) {
+    debugLogs.push({ time: new Date().toISOString(), type: "SEND_EXCEPTION", error: err?.message || String(err), to });
     console.error("Exception envoi WhatsApp:", err);
     return false;
   }
