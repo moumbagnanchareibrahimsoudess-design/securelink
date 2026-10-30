@@ -1,34 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { answerQuestion } from "@/lib/scanner";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const question = body?.question;
+    const context = body?.context || {};
 
-    const backendUrl = (process.env.SECURELINK_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-    const backendResponse = await fetch(
-      `${backendUrl}/ask`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.SECURELINK_API_KEY as string,
-        },
-        body: JSON.stringify(body),
-      }
-    );
-
-    if (!backendResponse.ok) {
+    if (typeof question !== "string" || !question.trim()) {
       return NextResponse.json(
-        { error: "Le conseiller n'a pas pu traiter votre demande pour le moment." },
-        { status: backendResponse.status }
+        { error: "La question est requise." },
+        { status: 400 }
       );
     }
 
-    const data = await backendResponse.json();
-    return NextResponse.json(data);
-  } catch {
+    const response = await answerQuestion(question, context);
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("Erreur lors de l'appel du conseiller :", error);
     return NextResponse.json(
-      { error: "Erreur de communication avec le serveur d'assistance." },
+      { error: "Le conseiller n'a pas pu traiter votre demande pour le moment." },
       { status: 500 }
     );
   }

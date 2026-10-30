@@ -1,28 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { analyzeContent } from "@/lib/scanner";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
+    const content = body?.content;
 
-  const backendUrl = (process.env.SECURELINK_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-  const backendResponse = await fetch(
-    `${backendUrl}/analyze`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.SECURELINK_API_KEY as string,
-      },
-      body: JSON.stringify(body),
+    if (typeof content !== "string" || !content.trim()) {
+      return NextResponse.json(
+        { error: "Le contenu à analyser est requis." },
+        { status: 400 }
+      );
     }
-  );
 
-  if (!backendResponse.ok) {
+    const result = await analyzeContent(content);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Erreur lors de l'analyse :", error);
     return NextResponse.json(
-      { error: "Erreur lors de l'analyse." },
-      { status: backendResponse.status }
+      { error: "Erreur interne lors de l'analyse." },
+      { status: 500 }
     );
   }
-
-  const data = await backendResponse.json();
-  return NextResponse.json(data);
 }

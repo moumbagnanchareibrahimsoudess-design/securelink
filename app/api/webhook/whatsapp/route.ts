@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { analyzeContent } from "@/lib/scanner";
 
 const WHATSAPP_VERIFY_TOKEN =
   process.env.WHATSAPP_VERIFY_TOKEN || "securelink_verify_token_2026";
@@ -112,25 +113,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: "ok" });
     }
 
-    // 2. Appel de l'analyseur
-    const backendUrl = (process.env.SECURELINK_API_URL || "https://securelink-production-3189.up.railway.app").replace(/\/$/, "");
+    // 2. Appel de l'analyseur natif en mémoire (sans dépendance externe Railway, 0ms de latence)
     let analysisResult: any = null;
 
     try {
-      const res = await fetch(`${backendUrl}/analyze`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": SECURELINK_DEFAULT_KEY,
-        },
-        body: JSON.stringify({ content: textBody }),
-      });
-
-      if (res.ok) {
-        analysisResult = await res.json();
-      }
+      analysisResult = await analyzeContent(textBody);
     } catch (err) {
-      console.error("Erreur appel backend analyze:", err);
+      console.error("Erreur analyzeContent:", err);
     }
 
     if (!analysisResult) {
