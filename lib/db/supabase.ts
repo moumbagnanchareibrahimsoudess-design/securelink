@@ -3,11 +3,15 @@ import { maskSensitiveData } from "./anonymizer";
 import { AnalysisResult } from "@/lib/scanner/types";
 
 const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  "https://kjalkseyhamlxdpxywgg.supabase.co";
+
 const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_ANON_KEY;
+  process.env.SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqYWxrc2V5aGFtbHhkcHh5d2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMjgwODUsImV4cCI6MjEwODkwNDA4NX0.zqfx9nngj6DYZcEOGi9cH7WFRlmHtEcyyMArt9se4Io";
 
 export const supabase =
   supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
