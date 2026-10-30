@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeContent } from "@/lib/scanner";
+import { logAnalysisSafe } from "@/lib/db/supabase";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +15,10 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await analyzeContent(content);
+
+    // Enregistrement asynchrone non-bloquant pour le dataset et les métriques startup
+    logAnalysisSafe(content, result, "web").catch(() => {});
+
     return NextResponse.json(result);
   } catch (error) {
     console.error("Erreur lors de l'analyse :", error);

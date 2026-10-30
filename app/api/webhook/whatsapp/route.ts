@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeContent } from "@/lib/scanner";
+import { logAnalysisSafe } from "@/lib/db/supabase";
 
 const WHATSAPP_VERIFY_TOKEN =
   process.env.WHATSAPP_VERIFY_TOKEN || "securelink_verify_token_2026";
@@ -129,6 +130,9 @@ export async function POST(request: NextRequest) {
       );
       return NextResponse.json({ status: "ok" });
     }
+
+    // Enregistrement asynchrone non-bloquant pour le dataset et les métriques startup
+    logAnalysisSafe(textBody, analysisResult, "whatsapp").catch(() => {});
 
     // 3. Formatage de la réponse WhatsApp
     const risk = analysisResult.risk || {};
