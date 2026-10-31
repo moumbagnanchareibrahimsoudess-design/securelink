@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await answerQuestion(question, context);
-    return NextResponse.json(response);
+    return NextResponse.json({
+      reply: response.answer,
+      answer: response.answer,
+    });
   } catch (error) {
     console.error("Erreur lors de l'appel du conseiller :", error);
     return NextResponse.json(
