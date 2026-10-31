@@ -568,54 +568,31 @@ Vérifié avec SecureLink.`;
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Link
-            href="/stats"
+        {hasStarted && (
+          <button
+            onClick={handleReset}
+            className="btn-hover"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
-              backgroundColor: "#E0F2FE",
-              color: "#0369A1",
-              border: "1px solid #BAE6FD",
+              backgroundColor: "#F1F5F9",
+              color: "#334155",
+              border: "1px solid #CBD5E1",
               borderRadius: 8,
               padding: "5px 10px",
               fontSize: 12,
-              fontWeight: 700,
-              textDecoration: "none",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.2s",
               whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
-            <span>📊</span>
-            <span className="hidden sm:inline">Observatoire</span>
-          </Link>
-
-          {hasStarted && (
-            <button
-              onClick={handleReset}
-              className="btn-hover"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                backgroundColor: "#F1F5F9",
-                color: "#334155",
-                border: "1px solid #CBD5E1",
-                borderRadius: 8,
-                padding: "5px 10px",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.2s",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
-              <span>↺</span>
-              <span className="hidden sm:inline">Nouvelle analyse</span>
-            </button>
-          )}
-        </div>
+            <span>↺</span>
+            <span className="hidden sm:inline">Nouvelle analyse</span>
+          </button>
+        )}
       </header>
 
       {/* Zone centrale défilante */}

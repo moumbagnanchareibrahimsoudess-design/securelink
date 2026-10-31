@@ -109,12 +109,6 @@ export default function LandingPage() {
               >
                 Confidentialité & ANTIC
               </a>
-              <Link
-                href="/stats"
-                style={{ textDecoration: "none", color: "#0F4C5C", fontSize: 14, fontWeight: 700 }}
-              >
-                Observatoire 📊
-              </Link>
             </div>
 
             <Link
