@@ -22,6 +22,7 @@ type AnalyzeResult = {
   explanation: string[];
   recommended_action: string;
   recommended_actions: string[];
+  analysis_id?: number | null;
 };
 
 type FollowUp = {
@@ -39,6 +40,8 @@ type Exchange = {
   result: AnalyzeResult | null;
   error: string | null;
   followUps?: FollowUp[];
+  feedback?: "helpful" | "unhelpful" | null;
+  feedbackLoading?: boolean;
 };
 
 const RISK_COLORS: Record<string, string> = {
@@ -378,6 +381,43 @@ export default function AnalysePage() {
     }
   }
 
+  async function handleSendFeedback(
+    exchangeId: number,
+    rating: "helpful" | "unhelpful",
+    analysisId?: number | null
+  ) {
+    setExchanges((prev) =>
+      prev.map((e) =>
+        e.id === exchangeId ? { ...e, feedbackLoading: true } : e
+      )
+    );
+
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis_id: analysisId,
+          rating,
+        }),
+      });
+
+      setExchanges((prev) =>
+        prev.map((e) =>
+          e.id === exchangeId
+            ? { ...e, feedback: rating, feedbackLoading: false }
+            : e
+        )
+      );
+    } catch {
+      setExchanges((prev) =>
+        prev.map((e) =>
+          e.id === exchangeId ? { ...e, feedbackLoading: false } : e
+        )
+      );
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -528,31 +568,54 @@ Vérifié avec SecureLink.`;
           </div>
         </div>
 
-        {hasStarted && (
-          <button
-            onClick={handleReset}
-            className="btn-hover"
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Link
+            href="/stats"
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
-              backgroundColor: "#F1F5F9",
-              color: "#334155",
-              border: "1px solid #CBD5E1",
+              backgroundColor: "#E0F2FE",
+              color: "#0369A1",
+              border: "1px solid #BAE6FD",
               borderRadius: 8,
               padding: "5px 10px",
               fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.2s",
+              fontWeight: 700,
+              textDecoration: "none",
               whiteSpace: "nowrap",
-              flexShrink: 0,
             }}
           >
-            <span>↺</span>
-            <span className="hidden sm:inline">Nouvelle analyse</span>
-          </button>
-        )}
+            <span>📊</span>
+            <span className="hidden sm:inline">Observatoire</span>
+          </Link>
+
+          {hasStarted && (
+            <button
+              onClick={handleReset}
+              className="btn-hover"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                backgroundColor: "#F1F5F9",
+                color: "#334155",
+                border: "1px solid #CBD5E1",
+                borderRadius: 8,
+                padding: "5px 10px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}
+            >
+              <span>↺</span>
+              <span className="hidden sm:inline">Nouvelle analyse</span>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Zone centrale défilante */}
@@ -1151,6 +1214,85 @@ Vérifié avec SecureLink.`;
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Section 6: Boucle de Rétroaction Utilisateur (Gold Standard IA) */}
+                  <div
+                    style={{
+                      borderTop: "1px solid #E2E8F0",
+                      marginTop: 18,
+                      paddingTop: 14,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 10,
+                    }}
+                  >
+                    <div style={{ fontSize: 13, color: "#475569", display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>Ce diagnostic vous a-t-il été utile ?</span>
+                    </div>
+
+                    {exchange.feedback ? (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: exchange.feedback === "helpful" ? "#047857" : "#B45309",
+                          backgroundColor: exchange.feedback === "helpful" ? "#ECFDF5" : "#FEF3C7",
+                          padding: "4px 10px",
+                          borderRadius: 6,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        {exchange.feedback === "helpful" ? "👍 Merci pour votre avis !" : "👎 Noté, merci pour ce signalement."}
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          onClick={() => handleSendFeedback(exchange.id, "helpful", exchange.result?.analysis_id)}
+                          disabled={exchange.feedbackLoading}
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            border: "1px solid #CBD5E1",
+                            borderRadius: 6,
+                            padding: "4px 10px",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "#0F4C5C",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          👍 Oui, très utile
+                        </button>
+                        <button
+                          onClick={() => handleSendFeedback(exchange.id, "unhelpful", exchange.result?.analysis_id)}
+                          disabled={exchange.feedbackLoading}
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            border: "1px solid #CBD5E1",
+                            borderRadius: 6,
+                            padding: "4px 10px",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "#64748B",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          👎 Inexact / Pas clair
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

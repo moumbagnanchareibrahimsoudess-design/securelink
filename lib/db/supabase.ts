@@ -21,31 +21,38 @@ export async function logAnalysisSafe(
   result: AnalysisResult,
   source: "web" | "whatsapp" = "web",
   consentForTraining: boolean = true
-): Promise<void> {
+): Promise<number | null> {
   if (!supabase) {
-    return;
+    return null;
   }
 
   try {
     const safeContent = maskSensitiveData(content);
 
-    const { error } = await supabase.from("analyses").insert({
-      source,
-      content: safeContent,
-      url: result.url,
-      risk_score: result.risk.score,
-      risk_level: result.risk.level,
-      signals: result.signals,
-      relations: result.relations,
-      explanation: result.explanation,
-      recommended_action: result.recommended_action,
-      user_consent_training: consentForTraining,
-    });
+    const { data, error } = await supabase
+      .from("analyses")
+      .insert({
+        source,
+        content: safeContent,
+        url: result.url,
+        risk_score: result.risk.score,
+        risk_level: result.risk.level,
+        signals: result.signals,
+        relations: result.relations,
+        explanation: result.explanation,
+        recommended_action: result.recommended_action,
+        user_consent_training: consentForTraining,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       console.warn("Supabase logAnalysis warning:", error.message);
+      return null;
     }
+    return data?.id ?? null;
   } catch (err) {
     console.warn("Supabase logAnalysis exception:", err);
+    return null;
   }
 }

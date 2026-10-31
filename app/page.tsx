@@ -109,6 +109,12 @@ export default function LandingPage() {
               >
                 Confidentialité & ANTIC
               </a>
+              <Link
+                href="/stats"
+                style={{ textDecoration: "none", color: "#0F4C5C", fontSize: 14, fontWeight: 700 }}
+              >
+                Observatoire 📊
+              </Link>
             </div>
 
             <Link
@@ -672,6 +678,116 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Section WhatsApp Bot */}
+      <section
+        style={{
+          padding: "50px 20px",
+          backgroundColor: "#F0FDF4",
+          borderTop: "1px solid #DCFCE7",
+          borderBottom: "1px solid #DCFCE7",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1000,
+            margin: "0 auto",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 24,
+          }}
+        >
+          <div style={{ flex: "1 1 500px" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                backgroundColor: "#DCFCE7",
+                color: "#166534",
+                padding: "4px 10px",
+                borderRadius: 9999,
+                fontSize: 12,
+                fontWeight: 700,
+                marginBottom: 12,
+              }}
+            >
+              💬 Numéro Officiel WhatsApp
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(22px, 4vw, 28px)",
+                fontWeight: 800,
+                color: "#0F172A",
+                marginBottom: 10,
+              }}
+            >
+              Scannez vos SMS directement sur WhatsApp
+            </h2>
+            <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.6, marginBottom: 18 }}>
+              Pas envie d&apos;ouvrir le navigateur ? Ajoutez SecureLink à vos contacts au <strong>+237 6 56 73 13 63</strong> et transférez-lui directement n&apos;importe quel message ou lien suspect pour recevoir le diagnostic.
+            </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <a
+                href="https://wa.me/237656731363?text=Bonjour"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: "#25D366",
+                  color: "#FFFFFF",
+                  padding: "10px 18px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  boxShadow: "0 2px 6px rgba(37,211,102,0.3)",
+                }}
+              >
+                <span>💬 Ouvrir la discussion (+237 6 56 73 13 63)</span>
+              </a>
+              <Link
+                href="/analyse"
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  color: "#0F4C5C",
+                  border: "1px solid #CBD5E1",
+                  padding: "10px 18px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                Utiliser le Scanner Web
+              </Link>
+            </div>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #E2E8F0",
+              borderRadius: 16,
+              padding: "20px",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+            }}
+          >
+            <div style={{ fontSize: 48, marginBottom: 8 }}>📱</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A", marginBottom: 4 }}>
+              +237 6 56 73 13 63
+            </div>
+            <div style={{ fontSize: 12, color: "#64748B" }}>
+              Enregistrez le contact sous &ldquo;SecureLink&rdquo;
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pied de page (Footer) */}
       <footer
         style={{
@@ -694,6 +810,33 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Bouton Flottant WhatsApp */}
+      <a
+        href="https://wa.me/237656731363?text=Bonjour"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 99,
+          backgroundColor: "#25D366",
+          color: "#FFFFFF",
+          borderRadius: 9999,
+          padding: "12px 18px",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontWeight: 700,
+          fontSize: 13,
+          boxShadow: "0 6px 20px rgba(37, 211, 102, 0.4)",
+          textDecoration: "none",
+        }}
+      >
+        <span style={{ fontSize: 18 }}>💬</span>
+        <span>WhatsApp Direct</span>
+      </a>
     </div>
   );
 }

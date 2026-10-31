@@ -16,10 +16,18 @@ export async function POST(request: NextRequest) {
 
     const result = await analyzeContent(content);
 
-    // Enregistrement asynchrone non-bloquant pour le dataset et les métriques startup
-    logAnalysisSafe(content, result, "web").catch(() => {});
+    // Enregistrement asynchrone sécurisé dans Supabase
+    let analysisId: number | null = null;
+    try {
+      analysisId = await logAnalysisSafe(content, result, "web");
+    } catch {
+      // Non-bloquant si la DB a une micro-coupure
+    }
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      analysis_id: analysisId,
+    });
   } catch (error) {
     console.error("Erreur lors de l'analyse :", error);
     return NextResponse.json(
