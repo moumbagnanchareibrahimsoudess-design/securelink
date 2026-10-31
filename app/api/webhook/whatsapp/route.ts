@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeContent } from "@/lib/scanner";
-import { logAnalysisSafe } from "@/lib/db/supabase";
+import { logAnalysisSafe, supabase } from "@/lib/db/supabase";
 
 const WHATSAPP_VERIFY_TOKEN =
   process.env.WHATSAPP_VERIFY_TOKEN || "securelink_verify_token_2026";
@@ -110,7 +110,21 @@ export async function POST(request: NextRequest) {
         "• Liens suspects ou demandes d'argent\n\n" +
         "Je vous répondrai en 2 secondes avec un diagnostic clair et les réflexes d'urgence. 🛡️";
 
-      await sendWhatsApp(fromNumber, welcome);
+      const sendRes = await sendWhatsApp(fromNumber, welcome);
+
+      if (supabase) {
+        Promise.resolve(
+          supabase.from("analyses").insert({
+            source: "whatsapp",
+            content: `[SALUTATION] ${textBody} (Envoyé: ${sendRes ? 'SUCCÈS' : 'ÉCHEC'})`,
+            risk_score: 0,
+            risk_level: "Low",
+            recommended_action: "Message d'accueil envoyé",
+            user_consent_training: false,
+          })
+        ).catch(() => {});
+      }
+
       return NextResponse.json({ status: "ok" });
     }
 
