@@ -339,6 +339,10 @@ export default function AnalysePage() {
 
       if (!res.ok) throw new Error("Erreur conseiller");
       const data = await res.json();
+      const replyText =
+        data.reply ||
+        data.answer ||
+        "Le conseiller a traité votre demande mais n'a pas pu formuler de texte spécifique.";
 
       setExchanges((prev) =>
         prev.map((e) => {
@@ -346,7 +350,9 @@ export default function AnalysePage() {
             return {
               ...e,
               followUps: (e.followUps ?? []).map((f) =>
-                f.id === followUpId ? { ...f, loading: false, reply: data.reply } : f
+                f.id === followUpId
+                  ? { ...f, loading: false, reply: replyText }
+                  : f
               ),
             };
           }
