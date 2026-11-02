@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const content = body?.content;
+    const consentProofId = typeof body?.consent_proof_id === "string" ? body.consent_proof_id : null;
+    const requestedConsent = Boolean(body?.consent);
 
     if (typeof content !== "string" || !content.trim()) {
       return NextResponse.json(
@@ -17,9 +19,20 @@ export async function POST(request: NextRequest) {
     const result = await analyzeContent(content);
 
     // Enregistrement asynchrone sécurisé dans Supabase
+    // Règle : si pas de preuve serveur valide, logAnalysisSafe applique false par défaut
     let analysisId: number | null = null;
+    let withdrawalToken: string | undefined = undefined;
+
     try {
-      analysisId = await logAnalysisSafe(content, result, "web");
+      const logRes = await logAnalysisSafe(
+        content,
+        result,
+        "web",
+        requestedConsent,
+        consentProofId
+      );
+      analysisId = logRes.analysisId;
+      withdrawalToken = logRes.withdrawalToken;
     } catch {
       // Non-bloquant si la DB a une micro-coupure
     }
@@ -27,6 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ...result,
       analysis_id: analysisId,
+      ...(withdrawalToken ? { withdrawal_token: withdrawalToken } : {}),
     });
   } catch (error) {
     console.error("Erreur lors de l'analyse :", error);

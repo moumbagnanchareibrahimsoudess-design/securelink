@@ -23,6 +23,7 @@ type AnalyzeResult = {
   recommended_action: string;
   recommended_actions: string[];
   analysis_id?: number | null;
+  withdrawal_token?: string;
 };
 
 type FollowUp = {
@@ -268,10 +269,30 @@ export default function AnalysePage() {
     ]);
 
     try {
+      // Récupération de la preuve de consentement serveur si l'utilisateur a consenti
+      let consentProofId: string | null = null;
+      let consentVal = false;
+      try {
+        const storedConsent = localStorage.getItem("securelink_privacy_consent");
+        if (storedConsent) {
+          const parsed = JSON.parse(storedConsent);
+          if (parsed.choice === "accepted" && parsed.proofId) {
+            consentProofId = parsed.proofId;
+            consentVal = true;
+          }
+        }
+      } catch {
+        // localStorage non accessible
+      }
+
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: textToSubmit }),
+        body: JSON.stringify({
+          content: textToSubmit,
+          consent: consentVal,
+          consent_proof_id: consentProofId,
+        }),
       });
 
       if (!response.ok) throw new Error("L'analyse a échoué.");
@@ -1271,6 +1292,73 @@ Vérifié avec SecureLink.`;
                       </div>
                     )}
                   </div>
+
+                  {/* Section 7: Droit au Retrait & Échantillon d'Apprentissage */}
+                  {exchange.result.withdrawal_token && (
+                    <div
+                      style={{
+                        borderTop: "1px dashed #A7F3D0",
+                        marginTop: 14,
+                        paddingTop: 12,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        backgroundColor: "#ECFDF5",
+                        padding: "10px 14px",
+                        borderRadius: 8,
+                        border: "1px solid #A7F3D0",
+                      }}
+                    >
+                      <span style={{ fontSize: 16 }}>🛡️</span>
+                      <div style={{ flex: 1, fontSize: 12, color: "#065F46" }}>
+                        <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                          Contribution Souveraine à l&apos;Apprentissage (Anonymisée)
+                        </div>
+                        <div>
+                          Merci pour votre contribution ! Cet échantillon a été anonymisé pour entraîner nos modèles de détection d&apos;Afrique francophone.
+                          Votre jeton de droit au retrait :{" "}
+                          <code
+                            style={{
+                              backgroundColor: "#D1FAE5",
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              fontWeight: 700,
+                              userSelect: "all",
+                            }}
+                          >
+                            {exchange.result.withdrawal_token}
+                          </code>{" "}
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(exchange.result?.withdrawal_token || "");
+                              alert("Jeton de retrait copié !");
+                            }}
+                            style={{
+                              backgroundColor: "#FFFFFF",
+                              border: "1px solid #6EE7B7",
+                              borderRadius: 4,
+                              padding: "2px 6px",
+                              fontSize: 11,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              marginLeft: 6,
+                            }}
+                          >
+                            📋 Copier
+                          </button>
+                        </div>
+                        <div style={{ marginTop: 4, fontSize: 11, color: "#047857" }}>
+                          Vous pouvez révoquer cet enregistrement à tout instant sur la{" "}
+                          <Link
+                            href="/politique-de-confidentialite"
+                            style={{ color: "#0F4C5C", textDecoration: "underline", fontWeight: 700 }}
+                          >
+                            Politique de Confidentialité
+                          </Link>.
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

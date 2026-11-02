@@ -689,8 +689,27 @@ export default function LandingPage() {
             <span style={{ fontWeight: 700, color: "#0F4C5C" }}>SecureLink</span>
             <span>— Plateforme de détection et prévention de cyber-fraude (Cameroun & Afrique)</span>
           </div>
-          <div>
-            Protection des données • Respect de la vie privée • Conseils ANTIC & Opérateurs
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <Link
+              href="/politique-de-confidentialite"
+              style={{ color: "#0F4C5C", textDecoration: "underline", fontWeight: 600 }}
+            >
+              Politique de Confidentialité
+            </Link>
+            <span>•</span>
+            <Link
+              href="/stats"
+              style={{ color: "#0F4C5C", textDecoration: "underline", fontWeight: 600 }}
+            >
+              Observatoire Public
+            </Link>
+            <span>•</span>
+            <Link
+              href="/analyse"
+              style={{ color: "#0F4C5C", textDecoration: "underline", fontWeight: 600 }}
+            >
+              Scanner un message
+            </Link>
           </div>
         </div>
       </footer>

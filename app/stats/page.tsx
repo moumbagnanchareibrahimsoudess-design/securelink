@@ -1,38 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
 interface StatsData {
   summary: {
     totalAnalyses: number;
-    byRisk: {
-      Critical: number;
-      High: number;
-      Medium: number;
-      Low: number;
-    };
-    bySource: {
-      web: number;
-      whatsapp: number;
-    };
-    criticalRate: number;
+    status?: string;
+    message?: string;
+    byRisk: Record<string, number | string>;
+    bySource: Record<string, number | string>;
+    highOrCriticalRate?: number | string;
+    criticalRate: number | string;
     feedback: {
       helpful: number;
       unhelpful: number;
-      satisfactionRate: number;
+      totalFeedback: number;
+      satisfactionRate: number | null;
     };
   };
-  recent: Array<{
-    id: number;
-    source: string;
-    content: string;
-    url: string | null;
-    risk_score: number;
-    risk_level: string;
-    signals: Array<{ type: string; evidence?: string }>;
-    created_at: string;
-  }>;
 }
 
 const RISK_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
@@ -47,7 +33,13 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadStats() {
+  // Gestion de l'exportation administrative sécurisée (Bearer token)
+  const [adminToken, setAdminToken] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleManualRefresh = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -55,19 +47,95 @@ export default function StatsPage() {
       if (!res.ok) throw new Error("Erreur de chargement des statistiques");
       const json = await res.json();
       setData(json);
-    } catch (err: any) {
-      setError(err?.message || "Impossible de charger les données");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Impossible de charger les données";
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    loadStats();
-    // Rafraîchissement automatique toutes les 30 secondes
-    const interval = setInterval(loadStats, 30000);
-    return () => clearInterval(interval);
+    let active = true;
+
+    fetch("/api/stats")
+      .then((res) => {
+        if (!res.ok) throw new Error("Erreur de chargement des statistiques");
+        return res.json();
+      })
+      .then((json: StatsData) => {
+        if (active) {
+          setData(json);
+          setError(null);
+          setLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (active) {
+          const msg = err instanceof Error ? err.message : "Impossible de charger les données";
+          setError(msg);
+          setLoading(false);
+        }
+      });
+
+    const interval = setInterval(() => {
+      fetch("/api/stats")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json: StatsData | null) => {
+          if (active && json) setData(json);
+        })
+        .catch(() => {});
+    }, 30000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
+
+  async function handleAdminDownload(format: "jsonl" | "csv") {
+    if (!adminToken.trim()) {
+      setExportError("Veuillez saisir votre clé d'administration (ADMIN_API_KEY).");
+      return;
+    }
+
+    setExportLoading(true);
+    setExportError(null);
+
+    try {
+      const res = await fetch(`/api/stats?format=${format}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken.trim()}`,
+        },
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error("Clé d'administration invalide ou non autorisée (401).");
+        }
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || `Erreur lors de l'exportation (${res.status}).`);
+      }
+
+      const blob = await res.blob();
+      const filename =
+        format === "jsonl" ? "securelink_learning_dataset.jsonl" : "securelink_learning_dataset.csv";
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      setShowExportModal(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur lors du téléchargement";
+      setExportError(msg);
+    } finally {
+      setExportLoading(false);
+    }
+  }
 
   return (
     <div
@@ -115,13 +183,13 @@ export default function StatsPage() {
                 textTransform: "uppercase",
               }}
             >
-              Télémétrie en Direct
+              Observatoire Public
             </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button
-              onClick={loadStats}
+              onClick={handleManualRefresh}
               disabled={loading}
               style={{
                 backgroundColor: "#F1F5F9",
@@ -165,7 +233,7 @@ export default function StatsPage() {
             Observatoire des Menaces & Télémétrie
           </h1>
           <p style={{ color: "#64748B", fontSize: 15, margin: 0 }}>
-            Suivi en temps réel des analyses anti-fraude, répartition des risques Mobile Money et flux de qualification de données pour l'Afrique francophone.
+            Suivi macro-agrégé des analyses anti-fraude, répartition des risques Mobile Money et indicateurs souverains pour l&apos;Afrique francophone.
           </p>
         </div>
 
@@ -184,8 +252,25 @@ export default function StatsPage() {
           </div>
         )}
 
+        {/* Message de seuil k-anonymat si volume restreint */}
+        {data?.summary?.status === "threshold_pending" && (
+          <div
+            style={{
+              backgroundColor: "#EFF6FF",
+              border: "1px solid #BFDBFE",
+              color: "#1E40AF",
+              padding: "16px 20px",
+              borderRadius: 10,
+              marginBottom: 24,
+              fontSize: 14,
+            }}
+          >
+            ℹ️ {data.summary.message}
+          </div>
+        )}
+
         {/* Grille des KPIs clés */}
-        {data && (
+        {data && data.summary.byRisk && (
           <>
             <div
               style={{
@@ -236,10 +321,12 @@ export default function StatsPage() {
                   <span style={{ fontSize: 20 }}>🚨</span>
                 </div>
                 <div style={{ fontSize: 32, fontWeight: 800, color: "#DC2626", marginBottom: 4 }}>
-                  {data.summary.byRisk.Critical + data.summary.byRisk.High}
+                  {typeof data.summary.highOrCriticalRate === "number"
+                    ? `${data.summary.highOrCriticalRate}%`
+                    : data.summary.highOrCriticalRate || `${data.summary.criticalRate}%`}
                 </div>
                 <div style={{ fontSize: 12, color: "#64748B" }}>
-                  Représente <strong>{data.summary.criticalRate}%</strong> des messages scannés
+                  Part des menaces qualifiées dans les flux observés
                 </div>
               </div>
 
@@ -260,10 +347,14 @@ export default function StatsPage() {
                   <span style={{ fontSize: 20 }}>👍</span>
                 </div>
                 <div style={{ fontSize: 32, fontWeight: 800, color: "#0F4C5C", marginBottom: 4 }}>
-                  {data.summary.feedback.satisfactionRate}%
+                  {data.summary.feedback.satisfactionRate !== null
+                    ? `${data.summary.feedback.satisfactionRate}%`
+                    : "—"}
                 </div>
                 <div style={{ fontSize: 12, color: "#64748B" }}>
-                  {data.summary.feedback.helpful} votes utiles sur la plateforme
+                  {data.summary.feedback.satisfactionRate !== null
+                    ? `${data.summary.feedback.helpful} votes utiles sur la plateforme`
+                    : "En attente de votes des utilisateurs"}
                 </div>
               </div>
 
@@ -279,7 +370,7 @@ export default function StatsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "#64748B" }}>
-                    Canaux d'Entrée
+                    Canaux d&apos;Entrée
                   </span>
                   <span style={{ fontSize: 20 }}>🌐</span>
                 </div>
@@ -312,7 +403,7 @@ export default function StatsPage() {
                 marginBottom: 28,
               }}
             >
-              {/* Distribution des Risques */}
+              {/* Distribution des Risques avec K-Anonymat (D-03) */}
               <div
                 style={{
                   backgroundColor: "#FFFFFF",
@@ -327,9 +418,12 @@ export default function StatsPage() {
                 </h3>
 
                 {(["Critical", "High", "Medium", "Low"] as const).map((level) => {
-                  const count = data.summary.byRisk[level];
+                  const rawCount = data.summary.byRisk[level];
                   const total = data.summary.totalAnalyses || 1;
-                  const pct = Math.round((count / total) * 100);
+                  const isString = typeof rawCount === "string";
+                  const countNum = typeof rawCount === "number" ? rawCount : 0;
+                  const pct = isString ? "< 3%" : `${Math.round((countNum / total) * 100)}%`;
+                  const barWidth = isString ? "4%" : `${Math.round((countNum / total) * 100)}%`;
                   const style = RISK_COLORS[level];
 
                   const labels: Record<string, string> = {
@@ -344,7 +438,7 @@ export default function StatsPage() {
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
                         <span style={{ fontWeight: 600 }}>{labels[level]}</span>
                         <span style={{ color: "#64748B" }}>
-                          {count} ({pct}%)
+                          {rawCount ?? 0} {isString ? "" : `(${pct})`}
                         </span>
                       </div>
                       <div
@@ -358,7 +452,7 @@ export default function StatsPage() {
                         <div
                           style={{
                             height: "100%",
-                            width: `${pct}%`,
+                            width: barWidth,
                             backgroundColor: style.bar,
                             borderRadius: 9999,
                             transition: "width 0.4s ease",
@@ -370,7 +464,7 @@ export default function StatsPage() {
                 })}
               </div>
 
-              {/* Boîte d'Exportation Dataset IA */}
+              {/* Boîte d'Exportation Dataset IA Privé */}
               <div
                 style={{
                   backgroundColor: "#0F4C5C",
@@ -385,172 +479,182 @@ export default function StatsPage() {
               >
                 <div>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.15)", padding: "3px 10px", borderRadius: 9999, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
-                    🤖 Pipeline Machine Learning
+                    🤖 Pipeline Machine Learning Souverain
                   </div>
                   <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 8 }}>
-                    Export du Dataset Souverain
+                    Export du Dataset d&apos;Apprentissage
                   </h3>
-                  <p style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9, marginBottom: 20 }}>
-                    Exportez toutes les analyses réelles anonymisées collectées par SecureLink pour entraîner ou affiner votre modèle de détection d'escroqueries locales (ONNX / DistilBERT).
+                  <p style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9, marginBottom: 14 }}>
+                    Source exclusive : schéma privé <code style={{ backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>private_ml.learning_samples</code>. Uniquement les échantillons approuvés et qualifiés par le pipeline de dé-identification.
                   </p>
+                  <div style={{ fontSize: 12, backgroundColor: "rgba(0,0,0,0.2)", padding: "8px 12px", borderRadius: 8, marginBottom: 16 }}>
+                    🔒 <strong>Accès Restreint :</strong> Jeton Bearer obligatoire (comparaison sécurisée en temps constant). Les requêtes non autorisées sont rejetées (HTTP 401).
+                  </div>
                 </div>
 
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <a
-                    href="/api/stats?format=jsonl"
-                    download="securelink_dataset.jsonl"
+                {!showExportModal ? (
+                  <button
+                    onClick={() => setShowExportModal(true)}
                     style={{
-                      flex: 1,
                       backgroundColor: "#FFFFFF",
                       color: "#0F4C5C",
-                      textAlign: "center",
+                      border: "none",
                       borderRadius: 8,
-                      padding: "10px 14px",
+                      padding: "10px 16px",
                       fontSize: 13,
                       fontWeight: 700,
-                      textDecoration: "none",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    📦 Exporter en JSONL (IA)
-                  </a>
-                  <a
-                    href="/api/stats?format=csv"
-                    download="securelink_telemetry.csv"
-                    style={{
-                      flex: 1,
-                      backgroundColor: "rgba(255,255,255,0.15)",
-                      color: "#FFFFFF",
+                      cursor: "pointer",
                       textAlign: "center",
-                      borderRadius: 8,
-                      padding: "10px 14px",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      textDecoration: "none",
-                      border: "1px solid rgba(255,255,255,0.3)",
                     }}
                   >
-                    📄 Exporter en CSV
-                  </a>
-                </div>
+                    🔐 Déverrouiller l&apos;Export Chercheur (ADMIN_API_KEY)
+                  </button>
+                ) : (
+                  <div style={{ backgroundColor: "rgba(255,255,255,0.1)", padding: 14, borderRadius: 8 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                      Clé d&apos;autorisation Bearer :
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Collez votre ADMIN_API_KEY..."
+                      value={adminToken}
+                      onChange={(e) => setAdminToken(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        borderRadius: 6,
+                        border: "1px solid rgba(255,255,255,0.3)",
+                        backgroundColor: "#FFFFFF",
+                        color: "#0F172A",
+                        fontSize: 13,
+                        marginBottom: 10,
+                        boxSizing: "border-box",
+                      }}
+                    />
+
+                    {exportError && (
+                      <div style={{ color: "#FCA5A5", fontSize: 12, marginBottom: 10 }}>
+                        ⚠️ {exportError}
+                      </div>
+                    )}
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={() => handleAdminDownload("jsonl")}
+                        disabled={exportLoading}
+                        style={{
+                          flex: 1,
+                          backgroundColor: "#FFFFFF",
+                          color: "#0F4C5C",
+                          border: "none",
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: exportLoading ? "wait" : "pointer",
+                        }}
+                      >
+                        {exportLoading ? "Téléchargement…" : "📦 Export JSONL"}
+                      </button>
+                      <button
+                        onClick={() => handleAdminDownload("csv")}
+                        disabled={exportLoading}
+                        style={{
+                          flex: 1,
+                          backgroundColor: "rgba(255,255,255,0.2)",
+                          color: "#FFFFFF",
+                          border: "1px solid rgba(255,255,255,0.4)",
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: exportLoading ? "wait" : "pointer",
+                        }}
+                      >
+                        📄 Export CSV
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowExportModal(false);
+                          setExportError(null);
+                        }}
+                        style={{
+                          backgroundColor: "transparent",
+                          color: "rgba(255,255,255,0.7)",
+                          border: "none",
+                          fontSize: 12,
+                          cursor: "pointer",
+                          padding: "0 6px",
+                        }}
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Tableau des Dernières Menaces Détectées */}
+            {/* Synthèse Macro des Vecteurs d'Attaque Observés (ZÉRO ANALYSE INDIVIDUELLE) */}
             <div
               style={{
                 backgroundColor: "#FFFFFF",
                 border: "1px solid #E2E8F0",
                 borderRadius: 12,
-                overflow: "hidden",
+                padding: "24px",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}
             >
-              <div
-                style={{
-                  padding: "18px 22px",
-                  borderBottom: "1px solid #E2E8F0",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", margin: 0 }}>
-                    Dernières Détections Anonymisées
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0F172A", margin: 0 }}>
+                    Typologies des Menaces Émergentes (Afrique Francophone)
                   </h3>
-                  <span style={{ fontSize: 12, color: "#64748B" }}>
-                    Flux filtré RGPD : aucun numéro de téléphone ni coordonnée bancaire n'est affiché.
+                  <span style={{ fontSize: 13, color: "#64748B" }}>
+                    Cartographie globale consolidée — protection intégrale contre toute ré-identification individuelle.
                   </span>
                 </div>
-                <span style={{ fontSize: 12, color: "#059669", fontWeight: 700 }}>
-                  ● Temps Réel
+                <span style={{ fontSize: 12, color: "#059669", fontWeight: 700, backgroundColor: "#ECFDF5", padding: "4px 10px", borderRadius: 9999 }}>
+                  ● Indicateurs Souverains
                 </span>
               </div>
 
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ backgroundColor: "#F8FAFC", borderBottom: "1px solid #E2E8F0", color: "#64748B" }}>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>ID</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Canal</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Niveau</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Score</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Contenu Détecté (Anonymisé)</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Signaux Clés</th>
-                      <th style={{ padding: "12px 18px", fontWeight: 600 }}>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.recent.map((item) => {
-                      const badgeStyle = RISK_COLORS[item.risk_level] || RISK_COLORS.Low;
-                      const dateStr = new Date(item.created_at).toLocaleString("fr-FR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+                <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#92400E", marginBottom: 4 }}>
+                    📱 Faux Dépôts & Annulations Mobile Money
+                  </div>
+                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+                    SMS imitant MTN MoMo ou Orange Money demandant d&apos;annuler une transaction erronée ou de renvoyer des fonds sur un lien frauduleux.
+                  </div>
+                </div>
 
-                      return (
-                        <tr
-                          key={item.id}
-                          style={{
-                            borderBottom: "1px solid #F1F5F9",
-                            transition: "background-color 0.1s",
-                          }}
-                        >
-                          <td style={{ padding: "12px 18px", color: "#94A3B8", fontWeight: 600 }}>
-                            #{item.id}
-                          </td>
-                          <td style={{ padding: "12px 18px", textTransform: "capitalize", fontWeight: 600, color: item.source.includes("whatsapp") ? "#059669" : "#334155" }}>
-                            {item.source}
-                          </td>
-                          <td style={{ padding: "12px 18px" }}>
-                            <span
-                              style={{
-                                backgroundColor: badgeStyle.bg,
-                                color: badgeStyle.text,
-                                padding: "3px 8px",
-                                borderRadius: 6,
-                                fontWeight: 700,
-                                fontSize: 11,
-                              }}
-                            >
-                              {item.risk_level}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px 18px", fontWeight: 700 }}>
-                            {item.risk_score}
-                          </td>
-                          <td style={{ padding: "12px 18px", maxWidth: 320, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {item.content}
-                          </td>
-                          <td style={{ padding: "12px 18px" }}>
-                            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                              {(item.signals || []).slice(0, 2).map((s, idx) => (
-                                <span
-                                  key={idx}
-                                  style={{
-                                    backgroundColor: "#F1F5F9",
-                                    color: "#475569",
-                                    fontSize: 11,
-                                    padding: "2px 6px",
-                                    borderRadius: 4,
-                                  }}
-                                >
-                                  {s.type}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 18px", color: "#94A3B8", whiteSpace: "nowrap" }}>
-                            {dateStr}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#991B1B", marginBottom: 4 }}>
+                    🔑 Vol d&apos;Identifiants & Codes Secrets (OTP / PIN)
+                  </div>
+                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+                    Pages miroirs exploitant l&apos;urgence psychologique pour dérober le code secret *126# ou *150# et vider le portefeuille électronique.
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#1E40AF", marginBottom: 4 }}>
+                    💼 Escroqueries aux Concours & Emplois Publics
+                  </div>
+                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+                    Usurpation de ministères ou douanes exigeant des frais de visite médicale ou de dossier payables exclusivement par Mobile Money.
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#166534", marginBottom: 4 }}>
+                    🌐 Domaines Trompeurs (Typosquattage)
+                  </div>
+                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+                    Adresses Web contrefaites avec extensions inhabituelles ou adresses IP brutes détectées et neutralisées par nos moteurs heuristiques.
+                  </div>
+                </div>
               </div>
             </div>
           </>

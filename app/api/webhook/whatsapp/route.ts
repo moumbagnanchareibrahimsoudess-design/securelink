@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { analyzeContent } from "@/lib/scanner";
+import { analyzeContent, AnalysisResult } from "@/lib/scanner";
 import { logAnalysisSafe, supabase } from "@/lib/db/supabase";
 
-const WHATSAPP_VERIFY_TOKEN =
-  process.env.WHATSAPP_VERIFY_TOKEN || "securelink_verify_token_2026";
-
-const WHATSAPP_TOKEN =
-  process.env.WHATSAPP_TOKEN ||
-  "EAAUXAdDM37oBSwyLZCxex8aIaD15ZAdIBzTmAVpHSde4GVvvYjNgzIBFEd58pHsxSddWq7owxuXNYDoZAwyODoHJgZBR9xNkQMRBQEVnp93Y6JKxvO7Cy1G6pzarClLKx3yPN45Jx8VvXWXKRGgkoQpiVUlbWUe3X1vy7wrOVmgfJlzIxTN2aHNT7Foo0RwUNwZDZD";
-
-const WHATSAPP_PHONE_NUMBER_ID =
-  process.env.WHATSAPP_PHONE_NUMBER_ID || "1483345801519471";
-
-const SECURELINK_DEFAULT_KEY =
-  process.env.SECURELINK_API_KEY || "00e86441555c7d489f8c3c0e6cf66e6d95e3f003741bceb08c8835d7f84971c6";
+const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
+const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
 const GREETINGS = new Set([
   "bonjour",
@@ -45,20 +36,16 @@ const RISK_LABELS_FR: Record<string, string> = {
   Low: "RISQUE FAIBLE",
 };
 
-const debugLogs: any[] = [];
-
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-
-  if (searchParams.get("debug") === "logs") {
-    return NextResponse.json({
-      status: "running",
-      token_configured: WHATSAPP_TOKEN.substring(0, 15) + "..." + WHATSAPP_TOKEN.substring(WHATSAPP_TOKEN.length - 10),
-      phone_id: WHATSAPP_PHONE_NUMBER_ID,
-      logs: debugLogs.slice(-20),
-    });
+  // Fail-Secure : si le jeton de vérification n'est pas configuré, le service est indisponible
+  if (!WHATSAPP_VERIFY_TOKEN) {
+    return NextResponse.json(
+      { error: "Service WhatsApp non configuré ou désactivé." },
+      { status: 503 }
+    );
   }
 
+  const searchParams = request.nextUrl.searchParams;
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
@@ -74,9 +61,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Fail-Secure : si les jetons d'émission ne sont pas configurés, le service est indisponible
+  if (!WHATSAPP_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
+    return NextResponse.json(
+      { error: "Service WhatsApp non configuré ou désactivé." },
+      { status: 503 }
+    );
+  }
+
   try {
     const payload = await request.json();
-    debugLogs.push({ time: new Date().toISOString(), type: "POST_RECEIVED", payload });
 
     // Traitement asynchrone pour répondre à Meta sous 3 secondes
     const entry = payload.entry?.[0];
@@ -129,7 +123,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Appel de l'analyseur natif en mémoire (sans dépendance externe Railway, 0ms de latence)
-    let analysisResult: any = null;
+    let analysisResult: AnalysisResult | null = null;
 
     try {
       analysisResult = await analyzeContent(textBody);
@@ -234,17 +228,12 @@ async function sendWhatsApp(to: string, messageText: string) {
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      debugLogs.push({ time: new Date().toISOString(), type: "SEND_ERROR", status: res.status, errText, to });
-      console.error("Erreur envoi message Meta WhatsApp:", res.status, errText);
+      console.error("Erreur envoi message Meta WhatsApp - statut HTTP:", res.status);
       return false;
     }
-    const successData = await res.json();
-    debugLogs.push({ time: new Date().toISOString(), type: "SEND_SUCCESS", to, successData });
     return true;
-  } catch (err: any) {
-    debugLogs.push({ time: new Date().toISOString(), type: "SEND_EXCEPTION", error: err?.message || String(err), to });
-    console.error("Exception envoi WhatsApp:", err);
+  } catch (err: unknown) {
+    console.error("Exception envoi WhatsApp:", err instanceof Error ? err.message : String(err));
     return false;
   }
 }
